@@ -5,7 +5,8 @@ description = "Self-supervised GNN for Network Intrusion Detection"
 readme = "README.md"
 requires-python = "==3.13.*"
 dependencies = [
-    "torch==2.8.0",
+    "torch",
+    "torch-sparse",
     "torch-geometric==2.7.0",
     "torchaudio==2.8.0",
     "torchvision==0.23.0",
@@ -25,12 +26,9 @@ dev = [
 ]
 
 [tool.uv.sources]
-pyg_lib = [ { index = "pyg" } ]
-
-[[tool.uv.index]]
-name = "pyg"
-url = "https://data.pyg.org/whl/torch-2.8.0+cu128.html"
-format = "flat"
+pyg_lib = { url = "https://data.pyg.org/whl/torch-2.8.0%2Bcu128/pyg_lib-0.5.0%2Bpt28cu128-cp313-cp313-win_amd64.whl" }
+torch-sparse = { url = "https://data.pyg.org/whl/torch-2.8.0%2Bcu128/torch_sparse-0.6.18%2Bpt28cu128-cp313-cp313-win_amd64.whl" }
+torch = { url = "https://download.pytorch.org/whl/cu128/torch-2.8.0%2Bcu128-cp313-cp313-win_amd64.whl" }
 
 [tool.ruff]
 line-length = 88
