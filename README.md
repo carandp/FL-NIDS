@@ -13,7 +13,7 @@ This folder contains the Centralized Benchmark.
 
 - **Goal.** Establish the maximum possible accuracy and F1-score using a standard local training environment.  
 - **Dataset.** Utilizes NetFlow V3 ([NF-CSE-CIC-IDS2018-v3](https://staff.itee.uq.edu.au/marius/NIDS_datasets/)).  
-- **Model.** Self-supervised Graph Neural Network ([GraphIDS by Lorenzo Guerra](https://github.com/lorenzo9uerra/GraphIDS)).
+- **Model.** Self-supervised Graph Neural Network ([GraphIDS](https://github.com/lorenzo9uerra/GraphIDS)).
 
 ### 1.2 federated/
 
