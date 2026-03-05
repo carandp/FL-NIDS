@@ -3,7 +3,7 @@ name = "graphids"
 version = "0.1.0"
 description = "Self-supervised GNN for Network Intrusion Detection"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = "==3.13.*"
 dependencies = [
     "torch==2.8.0",
     "torch-geometric==2.7.0",
