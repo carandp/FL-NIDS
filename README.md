@@ -4,18 +4,18 @@ This repository evaluates the trade-offs between privacy, performance, and compu
 ## Project Structure
 The project is organized into three main phases, each corresponding to a specific implementation milestone:
 
-### 1. Centralized/
+### 1. centralized/
 This folder contains the Centralized Benchmark.
 * Goal: Establish the maximum possible accuracy and F1-score using a standard local training environment.
 * Dataset: Utilizes NetFlow V3 ([NF-CSE-CIC-IDS2018-v3](https://staff.itee.uq.edu.au/marius/NIDS_datasets/)).
 * Model: Self-supervised Graph Neural Network ([GraphIDS by Lorenzo Guerra](https://github.com/lorenzo9uerra/GraphIDS)).
 
-### 2. Federated/
+### 2. federated/
 This folder contains the transition to Federated Learning using NVFlare.
 * Goal: Benchmark the performance of a distributed model without extra privacy layers.
 * Architecture: Implements a controller-client integration where the FL controller assigns training tasks to multiple clients.
 
-### 3. Federated+Privacy/
+### 3. federated_hard/
 This folder contains the Hardened Federated Model.
 * Secure Aggregation (SA): Cryptographic protection ensuring the server only sees combined updates, mitigating server-side data leakage.
 * Differential Privacy (DP): Implementation of controlled random noise to protect against membership inference attacks.
