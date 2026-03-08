@@ -142,7 +142,22 @@ class NetFlowDataset:
 
         os.makedirs(self.processed_dir, exist_ok=True)
 
-        df = pd.read_csv(os.path.join(self.raw_dir, f"{self.name}.csv"))
+        csv_path = os.path.join(self.raw_dir, f"{self.name}.csv")
+        timestamp_cols = {"FLOW_START_MILLISECONDS", "FLOW_END_MILLISECONDS"}
+        chunks = []
+        for chunk in pd.read_csv(csv_path, chunksize=500_000):
+            for col in chunk.select_dtypes(include=["float64"]).columns:
+                chunk[col] = chunk[col].astype(np.float32)
+            for col in chunk.select_dtypes(include=["int64"]).columns:
+                if col in timestamp_cols:
+                    continue
+                elif col == "Label":
+                    chunk[col] = chunk[col].astype(np.int8)
+                else:
+                    chunk[col] = chunk[col].astype(np.int32)
+            chunks.append(chunk)
+        df = pd.concat(chunks, ignore_index=True)
+        del chunks
 
         if self.fraction is not None:
             df = df.groupby(by="Attack").sample(
