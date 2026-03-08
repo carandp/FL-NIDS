@@ -1,0 +1,19 @@
+{
+  "format_version": 1,
+  "admin": {
+    "project_name": "example_project",
+    "username": "",
+    "server_identity": "server",
+    "scheme": "grpc",
+    "host": "localhost",
+    "port": 8003,
+    "connection_security": "mtls",
+    "uid_source": "cert",
+    "with_file_transfer": true,
+    "upload_dir": "transfer",
+    "download_dir": "transfer",
+    "client_key": "client.key",
+    "client_cert": "client.crt",
+    "ca_cert": "rootCA.pem"
+  }
+}

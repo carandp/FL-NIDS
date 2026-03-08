@@ -1,0 +1,72 @@
+2026-03-08 16:27:35,507 - ServerDeployer - INFO - server heartbeat timeout set to 600
+2026-03-08 16:27:35,570 - CoreCell - INFO - server: creating listener on grpc://0:8002
+2026-03-08 16:27:35,647 - CoreCell - INFO - server: created backbone external listener for grpc://0:8002
+2026-03-08 16:27:35,647 - CoreCell - INFO - server: creating listener on grpc://0:8003
+2026-03-08 16:27:35,647 - CoreCell - INFO - server: created backbone external listener for grpc://0:8003
+2026-03-08 16:27:35,648 - conn_manager - INFO - Connector [CH00003 PASSIVE tcp://0:61807] is starting
+2026-03-08 16:27:36,149 - CoreCell - INFO - server: created backbone internal listener for tcp://localhost:61807
+2026-03-08 16:27:36,149 - conn_manager - INFO - Connector [CH00001 PASSIVE grpc://0:8002] is starting
+2026-03-08 16:27:36,150 - conn_manager - INFO - Connector [CH00002 PASSIVE grpc://0:8003] is starting
+2026-03-08 16:27:36,151 - Cell - INFO - Register blob CB for channel='aux_communication', topic='*'
+2026-03-08 16:27:36,158 - FederatedServer - INFO - max_reg_duration=60.0
+2026-03-08 16:27:36,161 - AuxRunner - INFO - registered aux handler for topic ObjectStreamer.Request
+2026-03-08 16:27:36,165 - AuxRunner - INFO - registered aux handler for topic ObjectStreamer.Abort
+2026-03-08 16:27:36,166 - AuxRunner - INFO - registered aux handler for topic fed.event
+2026-03-08 16:27:36,168 - ServerDeployer - INFO - deployed FLARE Server.
+2026-03-08 16:27:36,169 - Server - INFO - added secure port at 0.0.0.0:8003
+2026-03-08 16:27:36,169 - Server - INFO - added secure port at 0.0.0.0:8002
+2026-03-08 16:27:36,174 - Cell - INFO - Register blob CB for channel='hci_channel', topic='*'
+2026-03-08 16:27:36,175 - hci - INFO - Admin Server is started
+2026-03-08 16:27:36,176 - root - INFO - Server started
+2026-03-08 16:27:36,662 - ServerState - INFO - Got the primary sp: server fl_port: 8002 SSID: ebc6125d-0a56-4688-9b08-355fe9e4d61a. Turning to hot.
+2026-03-08 16:27:36,744 - conn_manager - INFO - Connection [CN00002 0.0.0.0:8003 <= ipv6:%5B::1%5D:32922 SSL admin@nvidia.com] is created: PID: 4106
+2026-03-08 16:27:37,019 - conn_manager - INFO - Connection [CN00003 0.0.0.0:8002 <= ipv6:%5B::1%5D:51188 SSL site-1] is created: PID: 4106
+2026-03-08 16:27:37,436 - ClientManager - INFO - Client: New client site-1@172.25.89.50 joined. Sent token: eb159010-b0e1-4d6e-b73a-8226f299e00c.  Total clients: 1
+2026-03-08 16:27:37,751 - ClientManager - INFO - Client: New admin admin@nvidia.com@172.25.89.50 joined. Sent token: 72eecdd6-c97c-4347-955f-680830649d41.  Total clients: 1
+2026-03-08 16:27:37,818 - LoginModule - INFO - Created user session for admin@nvidia.com
+2026-03-08 16:39:27,126 - ServerEngine - INFO - FL server shutdown.
+2026-03-08 16:39:27,127 - ClientManager - INFO - Client Name:site-1 	Token: eb159010-b0e1-4d6e-b73a-8226f299e00c left.  Total clients: 0
+2026-03-08 16:39:27,129 - JobRunner - INFO - [identity=server, run=?] - Stop all the running jobs.
+2026-03-08 16:39:27,130 - FederatedServer - INFO - shutting down server
+2026-03-08 16:39:27,130 - FederatedServer - INFO - canceling sync locks
+2026-03-08 16:39:27,130 - FederatedServer - INFO - server off
+2026-03-08 16:39:27,231 - conn_manager - INFO - Connection [CN00002 Not Connected] is closed PID: 4106
+2026-03-08 16:39:28,087 - hci - INFO - Admin Server is stopped!
+2026-03-08 16:39:30,495 - conn_manager - INFO - Connection [CN00003 Not Connected] is closed PID: 4106
+2026-03-08 16:39:31,109 - MPM - INFO - MPM: Good Bye!
+2026-03-08 16:42:12,330 - ServerDeployer - INFO - server heartbeat timeout set to 600
+2026-03-08 16:42:12,392 - CoreCell - INFO - server: creating listener on grpc://0:8002
+2026-03-08 16:42:12,468 - CoreCell - INFO - server: created backbone external listener for grpc://0:8002
+2026-03-08 16:42:12,468 - CoreCell - INFO - server: creating listener on grpc://0:8003
+2026-03-08 16:42:12,469 - CoreCell - INFO - server: created backbone external listener for grpc://0:8003
+2026-03-08 16:42:12,469 - conn_manager - INFO - Connector [CH00003 PASSIVE tcp://0:46205] is starting
+2026-03-08 16:42:12,970 - CoreCell - INFO - server: created backbone internal listener for tcp://localhost:46205
+2026-03-08 16:42:12,970 - conn_manager - INFO - Connector [CH00001 PASSIVE grpc://0:8002] is starting
+2026-03-08 16:42:12,971 - conn_manager - INFO - Connector [CH00002 PASSIVE grpc://0:8003] is starting
+2026-03-08 16:42:12,972 - Cell - INFO - Register blob CB for channel='aux_communication', topic='*'
+2026-03-08 16:42:12,972 - FederatedServer - INFO - max_reg_duration=60.0
+2026-03-08 16:42:12,977 - AuxRunner - INFO - registered aux handler for topic ObjectStreamer.Request
+2026-03-08 16:42:12,978 - AuxRunner - INFO - registered aux handler for topic ObjectStreamer.Abort
+2026-03-08 16:42:12,978 - Server - INFO - added secure port at 0.0.0.0:8003
+2026-03-08 16:42:12,978 - AuxRunner - INFO - registered aux handler for topic fed.event
+2026-03-08 16:42:12,978 - Server - INFO - added secure port at 0.0.0.0:8002
+2026-03-08 16:42:12,980 - ServerDeployer - INFO - deployed FLARE Server.
+2026-03-08 16:42:12,984 - Cell - INFO - Register blob CB for channel='hci_channel', topic='*'
+2026-03-08 16:42:12,984 - hci - INFO - Admin Server is started
+2026-03-08 16:42:12,985 - root - INFO - Server started
+2026-03-08 16:42:13,443 - conn_manager - INFO - Connection [CN00002 0.0.0.0:8003 <= ipv6:%5B::1%5D:58390 SSL admin@nvidia.com] is created: PID: 9231
+2026-03-08 16:42:13,477 - ServerState - INFO - Got the primary sp: server fl_port: 8002 SSID: ebc6125d-0a56-4688-9b08-355fe9e4d61a. Turning to hot.
+2026-03-08 16:42:13,957 - conn_manager - INFO - Connection [CN00003 0.0.0.0:8002 <= ipv6:%5B::1%5D:45222 SSL site-1] is created: PID: 9231
+2026-03-08 16:42:14,369 - ClientManager - INFO - Client: New client site-1@172.25.89.50 joined. Sent token: 4e38df7b-51ab-42a4-9f32-1e24d140b0a1.  Total clients: 1
+2026-03-08 16:42:14,457 - ClientManager - INFO - Client: New admin admin@nvidia.com@172.25.89.50 joined. Sent token: f29ca7b4-c8f9-498a-809c-68122f27f01e.  Total clients: 1
+2026-03-08 16:42:14,524 - LoginModule - INFO - Created user session for admin@nvidia.com
+2026-03-08 16:44:23,443 - ServerEngine - INFO - FL server shutdown.
+2026-03-08 16:44:23,445 - ClientManager - INFO - Client Name:site-1 	Token: 4e38df7b-51ab-42a4-9f32-1e24d140b0a1 left.  Total clients: 0
+2026-03-08 16:44:23,445 - JobRunner - INFO - [identity=server, run=?] - Stop all the running jobs.
+2026-03-08 16:44:23,446 - FederatedServer - INFO - shutting down server
+2026-03-08 16:44:23,447 - FederatedServer - INFO - canceling sync locks
+2026-03-08 16:44:23,448 - FederatedServer - INFO - server off
+2026-03-08 16:44:23,548 - conn_manager - INFO - Connection [CN00002 Not Connected] is closed PID: 9231
+2026-03-08 16:44:24,168 - hci - INFO - Admin Server is stopped!
+2026-03-08 16:44:26,556 - conn_manager - INFO - Connection [CN00003 Not Connected] is closed PID: 9231
+2026-03-08 16:44:27,664 - MPM - INFO - MPM: Good Bye!
