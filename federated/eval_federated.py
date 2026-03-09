@@ -5,7 +5,6 @@ PTFileModelPersistor.  Reuses the centralized test/validate utilities.
 Usage (from the federated/ directory):
     uv run python eval_federated.py \
         --model path/to/FL_global_model.pt \
-        --data_dir /home/carandp/FL-NIDS/centralized/datasets \
         --dataset NF-CSE-CIC-IDS2018-v3
 """
 
@@ -17,6 +16,9 @@ import numpy as np
 import torch
 from sklearn.metrics import precision_recall_curve
 from torch_geometric.loader import LinkNeighborLoader
+
+import warnings
+warnings.filterwarnings("ignore", message="The PyTorch API of nested tensors is in prototype stage")
 
 # Make centralized utilities importable from the federated/ directory
 _CENTRALIZED = os.path.join(os.path.dirname(__file__), "..", "centralized")
@@ -94,10 +96,8 @@ def main():
         "--model", type=str, required=True,
         help="Path to FL_global_model.pt produced by NVFlare PTFileModelPersistor",
     )
-    parser.add_argument(
-        "--data_dir", type=str, required=True,
-        help="Path to the datasets directory (same as used in training)",
-    )
+    # Hardcode centralized datasets directory
+    CENTRALIZED_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "centralized", "datasets"))
     parser.add_argument(
         "--dataset", type=str, default="NF-CSE-CIC-IDS2018-v3",
         choices=["NF-UNSW-NB15-v3", "NF-CSE-CIC-IDS2018-v3",
@@ -131,6 +131,7 @@ def main():
                         help="Save precision-recall curve as .npz")
     parser.add_argument("--reload_dataset", action="store_true")
     args = parser.parse_args()
+    args.data_dir = CENTRALIZED_DATA_DIR
 
     # ------------------------------------------------------------------ #
     # 1. Build data loaders

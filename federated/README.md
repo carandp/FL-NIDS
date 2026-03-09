@@ -86,7 +86,6 @@ Type `bye` to exit the admin console and stop the POC environment.
 ```bash
 uv run python eval_federated.py \
     --model poc_workspace/example_project/prod_00/admin@nvidia.com/transfer/<job_id>/workspace/app_server/FL_global_model.pt \
-    --data_dir /home/<you>/FL-NIDS/centralized/datasets \
     --dataset NF-CSE-CIC-IDS2018-v3
 ```
 
