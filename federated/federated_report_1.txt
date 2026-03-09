@@ -1,4 +1,6 @@
-carandp@DESKTOP-2TD7K2T:~/FL-NIDS/federated$ uv run python eval_federated.py     --model poc_workspace/example_project/prod_00/admin@nvidia.com/transfer/c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7/workspace/app_server/FL_global_model.pt     --data_dir /home/carandp/FL-NIDS/centralized/datasets     --dataset NF-CSE-CIC-IDS2018-v3
+carandp@DESKTOP-2TD7K2T:~/FL-NIDS/federated$ uv run python eval_federated.py \
+    --model jobs/c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7/workspace/app_server/FL_global_model.pt \
+    --dataset NF-CSE-CIC-IDS2018-v3
 Node features: 49  |  Edge features: 49
 Loaded FL model from: poc_workspace/example_project/prod_00/admin@nvidia.com/transfer/c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7/workspace/app_server/FL_global_model.pt
 Computing validation errors to derive threshold...

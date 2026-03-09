@@ -15,15 +15,19 @@ uv sync
 
 ## 2. Configure the job
 
+Edit `jobs/nids_fedavg/config/config_fed_client.json` so it includes the correct username in the "data_dir".
+
+```
+"data_dir": "/home/<username>/FL-NIDS/centralized/datasets/"
+```
+
 Key training hyperparameters (edit as needed):
 
 | Parameter | Default | Description |
 |---|---|---|
-| `num_rounds` | `10` | Federation rounds (`config_fed_server.json`) |
 | `local_epochs` | `2` | Local epochs per client per round |
 | `fraction` | `0.2` | Dataset fraction used per client |
-| `batch_size` | `16384` | GNN mini-batch size |
-| `ae_batch_size` | `64` | Transformer sequence batch size |
+| `num_rounds` | `10` | Federation rounds (found in `config_fed_server.json`) |
 
 ---
 
@@ -32,7 +36,15 @@ Key training hyperparameters (edit as needed):
 The first time (or after deleting `poc_workspace/`):
 
 ```bash
-uv run nvflare poc prepare -n 1
+uv run nvflare poc prepare -i ./project.yml -d .
+```
+
+> By default the project.yml that builds the PoC has 2 clients, the job meta.json too.
+
+Link job directory
+
+```bash
+uv run nvflare poc prepare-jobs-dir -j ./jobs
 ```
 
 Then start the server, client, and admin console together:
@@ -50,7 +62,7 @@ You will see a `>` prompt — this is the NVFlare admin console.
 At the `>` prompt:
 
 ```
-submit_job jobs/nids_fedavg
+submit_job nids_fedavg
 ```
 
 The console prints the assigned job ID, e.g.:
@@ -74,10 +86,16 @@ download_job <job_id>
 This extracts the workspace to:
 
 ```
-poc_workspace/example_project/prod_00/admin@nvidia.com/transfer/<job_id>/workspace/app_server/FL_global_model.pt
+jobs/<job_id>/workspace/app_server/FL_global_model.pt
 ```
 
-Type `bye` to exit the admin console and stop the POC environment.
+Type `bye` to exit the admin console.
+
+Stop the POC environment:
+
+```bash
+uv run nvflare poc stop
+```
 
 ---
 
@@ -85,7 +103,7 @@ Type `bye` to exit the admin console and stop the POC environment.
 
 ```bash
 uv run python eval_federated.py \
-    --model poc_workspace/example_project/prod_00/admin@nvidia.com/transfer/<job_id>/workspace/app_server/FL_global_model.pt \
+    --model jobs/<job_id>/workspace/app_server/FL_global_model.pt \
     --dataset NF-CSE-CIC-IDS2018-v3
 ```
 

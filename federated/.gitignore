@@ -20,3 +20,7 @@ scalers/
 *.pt
 *.pth
 *.ckpt
+
+# Ignore downloaded jobs
+jobs/*
+!jobs/nids_fedavg/

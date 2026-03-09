@@ -6,7 +6,7 @@
       "executor": {
         "path": "nids_trainer.NIDSTrainer",
         "args": {
-          "data_dir": "../centralized/datasets/",
+          "data_dir": "/home/<username>/FL-NIDS/centralized/datasets/",
           "dataset_name": "NF-CSE-CIC-IDS2018-v3",
           "local_epochs": 2,
           "batch_size": 16384,

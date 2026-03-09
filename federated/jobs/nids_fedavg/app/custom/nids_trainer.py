@@ -45,7 +45,7 @@ class NIDSTrainer(Executor):
         fraction: float = 0.2,
     ):
         super().__init__()
-        self.data_dir = os.path.abspath(data_dir)
+        self.data_dir = data_dir
         self.dataset_name = dataset_name
         self.local_epochs = local_epochs
         self.batch_size = batch_size
