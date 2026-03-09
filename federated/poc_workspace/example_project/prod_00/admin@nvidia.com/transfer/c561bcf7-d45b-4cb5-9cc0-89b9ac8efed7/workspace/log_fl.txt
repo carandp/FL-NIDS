@@ -1,0 +1,124 @@
+2026-03-08 21:40:03,231 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg] - Initializing BaseModelController workflow.
+2026-03-08 21:40:03,231 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg] - Beginning model controller run.
+2026-03-08 21:40:03,232 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg] - 
+================================================================================
+                                 Start FedAvg.                                  
+================================================================================
+
+2026-03-08 21:40:03,232 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg] - loading initial model from persistor
+2026-03-08 21:40:03,232 - PTFileModelPersistor - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg] - Both source_ckpt_file_full_name and ckpt_preload_path are not provided. Using the default model weights initialized on the persistor side.
+2026-03-08 21:40:03,233 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg] - 
+--------------------------------------------------------------------------------
+                                Round 0 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:40:03,234 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:40:03,235 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg] - Sampled clients: ['site-1']
+2026-03-08 21:40:03,235 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg] - Sending task train to ['site-1']
+2026-03-08 21:41:27,077 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8700984-b368-4626-85cc-2473ab0d957a] - aggregating 1 update(s) at round 0
+2026-03-08 21:41:27,079 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8700984-b368-4626-85cc-2473ab0d957a] - Start persist model on server.
+2026-03-08 21:41:27,084 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8700984-b368-4626-85cc-2473ab0d957a] - End persist model on server.
+2026-03-08 21:41:27,085 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8700984-b368-4626-85cc-2473ab0d957a] - 
+--------------------------------------------------------------------------------
+                                Round 1 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:41:27,085 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8700984-b368-4626-85cc-2473ab0d957a] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:41:27,085 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8700984-b368-4626-85cc-2473ab0d957a] - Sampled clients: ['site-1']
+2026-03-08 21:41:27,086 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8700984-b368-4626-85cc-2473ab0d957a] - Sending task train to ['site-1']
+2026-03-08 21:42:46,124 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=5054de9a-e01c-4ae1-bf0e-ac26bbcf6b70] - aggregating 1 update(s) at round 1
+2026-03-08 21:42:46,126 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=5054de9a-e01c-4ae1-bf0e-ac26bbcf6b70] - Start persist model on server.
+2026-03-08 21:42:46,131 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=5054de9a-e01c-4ae1-bf0e-ac26bbcf6b70] - End persist model on server.
+2026-03-08 21:42:46,131 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=5054de9a-e01c-4ae1-bf0e-ac26bbcf6b70] - 
+--------------------------------------------------------------------------------
+                                Round 2 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:42:46,132 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=5054de9a-e01c-4ae1-bf0e-ac26bbcf6b70] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:42:46,132 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=5054de9a-e01c-4ae1-bf0e-ac26bbcf6b70] - Sampled clients: ['site-1']
+2026-03-08 21:42:46,132 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=5054de9a-e01c-4ae1-bf0e-ac26bbcf6b70] - Sending task train to ['site-1']
+2026-03-08 21:44:04,598 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=69e1e71a-4ade-4291-8d56-30a17f4f15cb] - aggregating 1 update(s) at round 2
+2026-03-08 21:44:04,599 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=69e1e71a-4ade-4291-8d56-30a17f4f15cb] - Start persist model on server.
+2026-03-08 21:44:04,604 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=69e1e71a-4ade-4291-8d56-30a17f4f15cb] - End persist model on server.
+2026-03-08 21:44:04,604 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=69e1e71a-4ade-4291-8d56-30a17f4f15cb] - 
+--------------------------------------------------------------------------------
+                                Round 3 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:44:04,604 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=69e1e71a-4ade-4291-8d56-30a17f4f15cb] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:44:04,605 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=69e1e71a-4ade-4291-8d56-30a17f4f15cb] - Sampled clients: ['site-1']
+2026-03-08 21:44:04,605 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=69e1e71a-4ade-4291-8d56-30a17f4f15cb] - Sending task train to ['site-1']
+2026-03-08 21:45:27,647 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=e39faf96-ca69-4920-9868-a0501961a7f6] - aggregating 1 update(s) at round 3
+2026-03-08 21:45:27,648 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=e39faf96-ca69-4920-9868-a0501961a7f6] - Start persist model on server.
+2026-03-08 21:45:27,652 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=e39faf96-ca69-4920-9868-a0501961a7f6] - End persist model on server.
+2026-03-08 21:45:27,653 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=e39faf96-ca69-4920-9868-a0501961a7f6] - 
+--------------------------------------------------------------------------------
+                                Round 4 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:45:27,653 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=e39faf96-ca69-4920-9868-a0501961a7f6] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:45:27,653 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=e39faf96-ca69-4920-9868-a0501961a7f6] - Sampled clients: ['site-1']
+2026-03-08 21:45:27,654 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=e39faf96-ca69-4920-9868-a0501961a7f6] - Sending task train to ['site-1']
+2026-03-08 21:46:40,489 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a4be9a4c-2c99-4d5f-9e6f-697a7a1e5bde] - aggregating 1 update(s) at round 4
+2026-03-08 21:46:40,490 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a4be9a4c-2c99-4d5f-9e6f-697a7a1e5bde] - Start persist model on server.
+2026-03-08 21:46:40,495 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a4be9a4c-2c99-4d5f-9e6f-697a7a1e5bde] - End persist model on server.
+2026-03-08 21:46:40,495 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a4be9a4c-2c99-4d5f-9e6f-697a7a1e5bde] - 
+--------------------------------------------------------------------------------
+                                Round 5 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:46:40,495 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a4be9a4c-2c99-4d5f-9e6f-697a7a1e5bde] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:46:40,496 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a4be9a4c-2c99-4d5f-9e6f-697a7a1e5bde] - Sampled clients: ['site-1']
+2026-03-08 21:46:40,496 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a4be9a4c-2c99-4d5f-9e6f-697a7a1e5bde] - Sending task train to ['site-1']
+2026-03-08 21:48:06,338 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=c794eb3c-21ed-436b-863c-55d683acae8a] - aggregating 1 update(s) at round 5
+2026-03-08 21:48:06,339 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=c794eb3c-21ed-436b-863c-55d683acae8a] - Start persist model on server.
+2026-03-08 21:48:06,344 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=c794eb3c-21ed-436b-863c-55d683acae8a] - End persist model on server.
+2026-03-08 21:48:06,344 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=c794eb3c-21ed-436b-863c-55d683acae8a] - 
+--------------------------------------------------------------------------------
+                                Round 6 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:48:06,344 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=c794eb3c-21ed-436b-863c-55d683acae8a] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:48:06,345 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=c794eb3c-21ed-436b-863c-55d683acae8a] - Sampled clients: ['site-1']
+2026-03-08 21:48:06,345 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=c794eb3c-21ed-436b-863c-55d683acae8a] - Sending task train to ['site-1']
+2026-03-08 21:49:33,991 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8592e4f-8787-4943-8202-b3b24c6e9eae] - aggregating 1 update(s) at round 6
+2026-03-08 21:49:33,993 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8592e4f-8787-4943-8202-b3b24c6e9eae] - Start persist model on server.
+2026-03-08 21:49:33,997 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8592e4f-8787-4943-8202-b3b24c6e9eae] - End persist model on server.
+2026-03-08 21:49:33,998 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8592e4f-8787-4943-8202-b3b24c6e9eae] - 
+--------------------------------------------------------------------------------
+                                Round 7 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:49:33,998 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8592e4f-8787-4943-8202-b3b24c6e9eae] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:49:33,998 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8592e4f-8787-4943-8202-b3b24c6e9eae] - Sampled clients: ['site-1']
+2026-03-08 21:49:33,999 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=f8592e4f-8787-4943-8202-b3b24c6e9eae] - Sending task train to ['site-1']
+2026-03-08 21:50:54,888 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=fc09a343-13b6-4ded-9c76-8add2821b5ef] - aggregating 1 update(s) at round 7
+2026-03-08 21:50:54,889 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=fc09a343-13b6-4ded-9c76-8add2821b5ef] - Start persist model on server.
+2026-03-08 21:50:54,894 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=fc09a343-13b6-4ded-9c76-8add2821b5ef] - End persist model on server.
+2026-03-08 21:50:54,894 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=fc09a343-13b6-4ded-9c76-8add2821b5ef] - 
+--------------------------------------------------------------------------------
+                                Round 8 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:50:54,895 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=fc09a343-13b6-4ded-9c76-8add2821b5ef] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:50:54,895 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=fc09a343-13b6-4ded-9c76-8add2821b5ef] - Sampled clients: ['site-1']
+2026-03-08 21:50:54,895 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=fc09a343-13b6-4ded-9c76-8add2821b5ef] - Sending task train to ['site-1']
+2026-03-08 21:52:17,135 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=1422556f-27af-43ab-ae19-a541b28164fc] - aggregating 1 update(s) at round 8
+2026-03-08 21:52:17,137 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=1422556f-27af-43ab-ae19-a541b28164fc] - Start persist model on server.
+2026-03-08 21:52:17,141 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=1422556f-27af-43ab-ae19-a541b28164fc] - End persist model on server.
+2026-03-08 21:52:17,142 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=1422556f-27af-43ab-ae19-a541b28164fc] - 
+--------------------------------------------------------------------------------
+                                Round 9 started.                                
+--------------------------------------------------------------------------------
+
+2026-03-08 21:52:17,142 - FedAvg - ERROR - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=1422556f-27af-43ab-ae19-a541b28164fc] - num_clients (3) is greater than the number of available clients. Returning all (1) available clients.
+2026-03-08 21:52:17,142 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=1422556f-27af-43ab-ae19-a541b28164fc] - Sampled clients: ['site-1']
+2026-03-08 21:52:17,143 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=1422556f-27af-43ab-ae19-a541b28164fc] - Sending task train to ['site-1']
+2026-03-08 21:53:40,785 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a2f4a1e2-5949-42ee-af18-04aa91ae154d] - aggregating 1 update(s) at round 9
+2026-03-08 21:53:40,786 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a2f4a1e2-5949-42ee-af18-04aa91ae154d] - Start persist model on server.
+2026-03-08 21:53:40,790 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a2f4a1e2-5949-42ee-af18-04aa91ae154d] - End persist model on server.
+2026-03-08 21:53:40,791 - FedAvg - INFO - [identity=example_project, run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, wf=fedavg, peer=site-1, peer_run=c561bcf7-d45b-4cb5-9cc0-89b9ac8efed7, peer_rc=OK, task_name=train, task_id=a2f4a1e2-5949-42ee-af18-04aa91ae154d] - 
+================================================================================
+                                Finished FedAvg.                                
+================================================================================
+
