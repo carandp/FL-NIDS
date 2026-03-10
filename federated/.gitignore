@@ -21,6 +21,9 @@ scalers/
 *.pth
 *.ckpt
 
-# Ignore downloaded jobs
+# Downloaded jobs
 jobs/*
 !jobs/nids_fedavg/
+
+# Generated config files
+# jobs/nids_fedavg/app/config/config_fed_client.json Uncomment after tracking changes

@@ -4,34 +4,16 @@
 
 ---
 
-## 1. Install dependencies
+## 1. Install dependencies and setup
 
 ```bash
 cd federated/
-uv sync
+uv sync && uv run python gen_config.py
 ```
 
 ---
 
-## 2. Configure the job
-
-Edit `jobs/nids_fedavg/config/config_fed_client.json` so it includes the correct username in the "data_dir".
-
-```
-"data_dir": "/home/<username>/FL-NIDS/centralized/datasets/"
-```
-
-Key training hyperparameters (edit as needed):
-
-| Parameter | Default | Description |
-|---|---|---|
-| `local_epochs` | `2` | Local epochs per client per round |
-| `fraction` | `0.2` | Dataset fraction used per client |
-| `num_rounds` | `10` | Federation rounds (found in `config_fed_server.json`) |
-
----
-
-## 3. Set up and start the POC environment
+## 2. Set up and start the POC environment
 
 The first time (or after deleting `poc_workspace/`):
 
@@ -57,7 +39,7 @@ You will see a `>` prompt — this is the NVFlare admin console.
 
 ---
 
-## 4. Submit the job
+## 3. Submit the job
 
 At the `>` prompt:
 
@@ -75,7 +57,7 @@ Training progress is printed to the same terminal. Each round logs the local epo
 
 ---
 
-## 5. Download the trained model
+## 4. Download the trained model
 
 Once all rounds complete (you will see `FINISHED:COMPLETED` in the logs), download the job output at the `>` prompt:
 
@@ -99,7 +81,7 @@ uv run nvflare poc stop
 
 ---
 
-## 6. Evaluate the model
+## 5. Evaluate the model
 
 ```bash
 uv run python eval_federated.py \

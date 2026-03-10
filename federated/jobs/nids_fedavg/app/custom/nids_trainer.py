@@ -2,6 +2,7 @@ import os
 import sys
 import torch
 import torch.nn as nn
+from sklearn.metrics import average_precision_score, f1_score
 from torch.utils.data import DataLoader
 from torch_geometric.loader import LinkNeighborLoader
 
@@ -14,6 +15,7 @@ from nvflare.apis.dxo import DXO, DataKind, from_shareable as dxo_from_shareable
 
 from graphids_model import GraphIDS
 from utils.dataloaders import SequentialDataset, collate_fn
+from utils.trainers import find_threshold, validate
 from nids_data_loader import get_loaders
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -43,6 +45,7 @@ class NIDSTrainer(Executor):
         mask_ratio: float = 0.15,
         positional_encoding=None,
         fraction: float = 0.2,
+        checkpoint_dir: str = "checkpoints",
     ):
         super().__init__()
         self.data_dir = data_dir
@@ -66,12 +69,16 @@ class NIDSTrainer(Executor):
         self.mask_ratio = mask_ratio
         self.positional_encoding = positional_encoding
         self.fraction = fraction
+        self.checkpoint_dir = checkpoint_dir
 
         # Initialized lazily on first round
         self.model = None
         self.optimizer = None
         self.train_loader = None
         self.val_loader = None
+
+        # Best-model tracking across rounds
+        self.best_val_pr_auc = 0.0
 
     # ------------------------------------------------------------------ #
     # NVFlare entry point                                                  #
@@ -149,8 +156,40 @@ class NIDSTrainer(Executor):
         # Snapshot before training for diff computation
         global_weights = {k: v.clone().cpu() for k, v in global_params.items()}
 
-        # --- 2. Local training ---
         current_round = dxo.get_meta_prop("current_round", 0)
+
+        # --- 2. Validate global model and save best checkpoint ---
+        _, val_errors, val_labels = validate(
+            self.model, self.val_loader, self.ae_batch_size, self.window_size, device
+        )
+        val_pr_auc = average_precision_score(val_labels.cpu(), val_errors.cpu())
+        threshold = find_threshold(val_errors, val_labels, method="supervised")
+        val_pred = (val_errors > threshold).int()
+        val_f1 = f1_score(val_labels.cpu(), val_pred.cpu(), average="macro", zero_division=0)
+        self.log_info(
+            fl_ctx,
+            f"Round {current_round} — global model: val_pr_auc={val_pr_auc:.4f}, "
+            f"val_f1={val_f1:.4f}, threshold={threshold:.6f}",
+        )
+
+        if val_pr_auc >= self.best_val_pr_auc:
+            self.best_val_pr_auc = val_pr_auc
+            os.makedirs(self.checkpoint_dir, exist_ok=True)
+            site_name = fl_ctx.get_identity_name()
+            ckpt_path = os.path.join(self.checkpoint_dir, f"best_global_model_{site_name}.pt")
+            torch.save(
+                {
+                    "model_state_dict": self.model.state_dict(),
+                    "round": current_round,
+                    "val_pr_auc": val_pr_auc,
+                    "val_f1": val_f1,
+                    "threshold": threshold,
+                },
+                ckpt_path,
+            )
+            self.log_info(fl_ctx, f"  New best model saved → {ckpt_path}")
+
+        # --- 3. Local training ---
         self.log_info(
             fl_ctx,
             f"Round {current_round} — {self.local_epochs} local epoch(s) on {device}",
@@ -165,14 +204,14 @@ class NIDSTrainer(Executor):
                 f"  Epoch {epoch + 1}/{self.local_epochs} — loss: {epoch_loss:.6f}",
             )
 
-        # --- 3. Compute weight diff and convert to numpy for DXO ---
+        # --- 4. Compute weight diff and convert to numpy for DXO ---
         local_weights = self.model.state_dict()
         weight_diff = {
             k: (local_weights[k].cpu() - global_weights[k]).numpy()
             for k in local_weights
         }
 
-        # --- 4. Return as DXO (stable across all NVFlare versions) ---
+        # --- 5. Return as DXO (stable across all NVFlare versions) ---
         num_samples = len(self.train_loader.dataset) if hasattr(self.train_loader, "dataset") else 1
         out_dxo = DXO(
             data_kind=DataKind.WEIGHT_DIFF,
