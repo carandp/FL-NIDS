@@ -195,14 +195,35 @@ class NIDSTrainer(Executor):
             f"Round {current_round} — {self.local_epochs} local epoch(s) on {device}",
         )
 
+        total_train_loss = 0.0
         for epoch in range(self.local_epochs):
             if abort_signal.triggered:
                 return make_reply(ReturnCode.TASK_ABORTED)
             epoch_loss = self._run_epoch(abort_signal)
+            total_train_loss += epoch_loss
             self.log_info(
                 fl_ctx,
                 f"  Epoch {epoch + 1}/{self.local_epochs} — loss: {epoch_loss:.6f}",
             )
+        total_train_loss /= max(self.local_epochs, 1)
+
+        # Validate locally-trained model and print round summary (mirrors centralized postfix)
+        val_loss_local, val_errors_local, val_labels_local = validate(
+            self.model, self.val_loader, self.ae_batch_size, self.window_size, device
+        )
+        val_pr_auc_local = average_precision_score(val_labels_local.cpu(), val_errors_local.cpu())
+        threshold_local = find_threshold(val_errors_local, val_labels_local, method="supervised")
+        val_pred_local = (val_errors_local > threshold_local).int()
+        val_f1_local = f1_score(val_labels_local.cpu(), val_pred_local.cpu(), average="macro", zero_division=0)
+        separator = "-" * 80
+        self.log_info(fl_ctx, separator)
+        self.log_info(
+            fl_ctx,
+            f"Round {current_round} complete — "
+            f"train_loss={total_train_loss:.6f}, val_loss={val_loss_local:.6f}, "
+            f"val_pr_auc={val_pr_auc_local:.4f}, val_f1={val_f1_local:.4f}",
+        )
+        self.log_info(fl_ctx, separator)
 
         # --- 4. Compute weight diff and convert to numpy for DXO ---
         local_weights = self.model.state_dict()
