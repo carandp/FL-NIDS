@@ -1,6 +1,5 @@
 .venv
 .vscode
-datasets
 wandb
 **/__pycache__/
 nohup.out

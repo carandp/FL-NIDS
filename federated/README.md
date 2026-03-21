@@ -1,6 +1,6 @@
 # Federated Learning — Quick Start Guide
 
-> Prerequisites: `uv` installed and the dataset available at `centralized/datasets/NF-CSE-CIC-IDS2018-v3/`. See the root README for setup details.
+> Prerequisites: `uv` installed and the dataset available at `datasets/NF-CSE-CIC-IDS2018-v3/`. See the root README for setup details.
 
 ---
 
