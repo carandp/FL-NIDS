@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import torch
@@ -77,8 +78,9 @@ class NIDSTrainer(Executor):
         self.train_loader = None
         self.val_loader = None
 
-        # Best-model tracking across rounds
+        # Best-model tracking and per-round metrics across rounds
         self.best_val_pr_auc = 0.0
+        self.metrics_history: list = []
 
     # ------------------------------------------------------------------ #
     # NVFlare entry point                                                  #
@@ -166,6 +168,7 @@ class NIDSTrainer(Executor):
         threshold = find_threshold(val_errors, val_labels, method="supervised")
         val_pred = (val_errors > threshold).int()
         val_f1 = f1_score(val_labels.cpu(), val_pred.cpu(), average="macro", zero_division=0)
+        site_name = fl_ctx.get_identity_name()
         self.log_info(
             fl_ctx,
             f"Round {current_round} — global model: val_pr_auc={val_pr_auc:.4f}, "
@@ -175,7 +178,6 @@ class NIDSTrainer(Executor):
         if val_pr_auc >= self.best_val_pr_auc:
             self.best_val_pr_auc = val_pr_auc
             os.makedirs(self.checkpoint_dir, exist_ok=True)
-            site_name = fl_ctx.get_identity_name()
             ckpt_path = os.path.join(self.checkpoint_dir, f"best_global_model_{site_name}.pt")
             torch.save(
                 {
@@ -224,6 +226,19 @@ class NIDSTrainer(Executor):
             f"val_pr_auc={val_pr_auc_local:.4f}, val_f1={val_f1_local:.4f}",
         )
         self.log_info(fl_ctx, separator)
+
+        # Persist per-round metrics for post-training reporting
+        self.metrics_history.append({
+            "round": current_round,
+            "train_loss": total_train_loss,
+            "val_loss": val_loss_local,
+            "val_pr_auc": val_pr_auc_local,
+            "val_f1": val_f1_local,
+        })
+        os.makedirs(self.checkpoint_dir, exist_ok=True)
+        metrics_path = os.path.join(self.checkpoint_dir, f"metrics_history_{site_name}.json")
+        with open(metrics_path, "w") as _f:
+            json.dump(self.metrics_history, _f, indent=2)
 
         # --- 4. Compute weight diff and convert to numpy for DXO ---
         local_weights = self.model.state_dict()

@@ -9,6 +9,7 @@ Usage (from the federated/ directory):
 """
 
 import argparse
+import json
 import os
 import sys
 
@@ -19,6 +20,65 @@ from torch_geometric.loader import LinkNeighborLoader
 
 import warnings
 warnings.filterwarnings("ignore", message="The PyTorch API of nested tensors is in prototype stage")
+
+_BLOCKS = "▁▂▃▄▅▆▇█"
+
+
+def _sparkline(values: list) -> str:
+    """Map a list of floats to an 8-level Unicode block sparkline."""
+    if not values:
+        return ""
+    if len(values) == 1:
+        return _BLOCKS[0]
+    lo, hi = min(values), max(values)
+    if hi == lo:
+        return _BLOCKS[0] * len(values)
+    return "".join(_BLOCKS[round((v - lo) / (hi - lo) * 7)] for v in values)
+
+
+def print_run_history(metrics_path: str) -> None:
+    """Print a wandb-style run history and summary from a metrics JSON file."""
+    with open(metrics_path) as _f:
+        history = json.load(_f)
+    if not history:
+        return
+
+    keys = ["train_loss", "val_loss", "val_pr_auc", "val_f1"]
+    col_w = max(len(k) for k in keys)
+    site = os.path.basename(metrics_path).replace("metrics_history_", "").replace(".json", "")
+
+    print(f"\nRun history ({site}):")
+    for k in keys:
+        vals = [r[k] for r in history if k in r]
+        print(f"  {k:>{col_w}} {_sparkline(vals)}")
+
+    last = history[-1]
+    print("\nRun summary:")
+    for k in keys:
+        if k in last:
+            print(f"  {k:>{col_w}} {last[k]:.6g}")
+
+
+def print_all_metrics(prod_root: str) -> None:
+    """Read per-site metrics from prod_00/site-*/checkpoints without glob searching."""
+    if not os.path.isdir(prod_root):
+        return
+
+    site_names = [
+        name
+        for name in sorted(os.listdir(prod_root))
+        if name.startswith("site-") and os.path.isdir(os.path.join(prod_root, name))
+    ]
+    for site_name in site_names:
+        metrics_path = os.path.join(
+            prod_root,
+            site_name,
+            "checkpoints",
+            f"metrics_history_{site_name}.json",
+        )
+        if os.path.isfile(metrics_path):
+            print_run_history(metrics_path)
+
 
 # Make centralized utilities importable from the federated/ directory
 _CENTRALIZED = os.path.join(os.path.dirname(__file__), "..", "centralized")
@@ -132,6 +192,9 @@ def main():
     parser.add_argument("--reload_dataset", action="store_true")
     args = parser.parse_args()
     args.data_dir = CENTRALIZED_DATA_DIR
+    PROD_ROOT = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "poc_workspace", "fl_nids", "prod_00")
+    )
 
     # ------------------------------------------------------------------ #
     # 1. Build data loaders
@@ -185,10 +248,6 @@ def main():
     print(f"Test PR-AUC         : {pr_auc:.4f}")
     print(f"Prediction time     : {pred_time:.4f} s")
 
-    if torch.cuda.is_available():
-        peak_mb = torch.cuda.max_memory_allocated() / (1024 * 1024)
-        print(f"Peak GPU memory     : {peak_mb:.2f} MB")
-
     if args.save_curve:
         precision, recall, _ = precision_recall_curve(test_labels.cpu(), errors.cpu())
         out_dir = os.path.join(os.path.dirname(__file__), "curves")
@@ -197,6 +256,7 @@ def main():
         np.savez(curve_path, precision=precision, recall=recall)
         print(f"PR curve saved to   : {curve_path}")
 
+    print_all_metrics(PROD_ROOT)
 
 if __name__ == "__main__":
     main()
