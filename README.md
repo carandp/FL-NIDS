@@ -42,7 +42,7 @@ This folder contains the Hardened Federated Model.
 
 - Linux / [WSL2](https://documentation.ubuntu.com/wsl/stable/howto/install-ubuntu-wsl2/)
 - [uv](https://docs.astral.sh/uv/) (for project management)
-- NetFlow V3 Dataset. You will need to download the University of Queensland feature-integrated [NF-CSE-CIC-IDS2018-v3](https://staff.itee.uq.edu.au/marius/NIDS_datasets/) dataset.
+- NetFlow V3 Dataset. You will need to download the University of Queensland feature-integrated NF-CSE-CIC-IDS2018-v3 dataset.
 
 ### 2.2 Downloading dataset
 
