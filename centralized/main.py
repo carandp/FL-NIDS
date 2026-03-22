@@ -92,7 +92,7 @@ def main(run):
     if torch.cuda.is_available():
         torch.cuda.reset_peak_memory_stats()
     cpu_count = os.cpu_count()
-    recommended_workers = 2
+    recommended_workers = min(cpu_count, 8) if cpu_count is not None else 0
     if start_epoch >= config.num_epochs or config.test:
         print("Model already trained")
         test_loader = LinkNeighborLoader(
@@ -103,7 +103,7 @@ def main(run):
             batch_size=config.batch_size,
             shuffle=shuffle,
             num_workers=recommended_workers,
-            pin_memory=True,
+            pin_memory=False,
             persistent_workers=True,
             drop_last=False,
         )
@@ -116,7 +116,7 @@ def main(run):
             batch_size=config.batch_size,
             shuffle=shuffle,
             num_workers=recommended_workers,
-            pin_memory=True,
+            pin_memory=False,
             persistent_workers=True,
             drop_last=True,
         )
@@ -128,7 +128,7 @@ def main(run):
             batch_size=config.batch_size,
             shuffle=shuffle,
             num_workers=recommended_workers,
-            pin_memory=True,
+            pin_memory=False,
             persistent_workers=True,
             drop_last=True,
         )
@@ -140,7 +140,7 @@ def main(run):
             batch_size=config.batch_size,
             shuffle=shuffle,
             num_workers=recommended_workers,
-            pin_memory=True,
+            pin_memory=False,
             persistent_workers=True,
             drop_last=False,
         )

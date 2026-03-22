@@ -1,0 +1,13 @@
+carandp@DESKTOP-2TD7K2T:~/FL-NIDS/federated$ uv run python eval_federated.py \
+    --model jobs/d1834623-4ad1-476b-97b8-a808342b107d/workspace/app_server/FL_global_model.pt \
+    --dataset NF-CSE-CIC-IDS2018-v3
+Node features: 49  |  Edge features: 49
+Loaded FL model from: jobs/d1834623-4ad1-476b-97b8-a808342b107d/workspace/app_server/FL_global_model.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.000708
+Evaluating on test set...
+
+Test macro F1-score : 0.8865
+Test PR-AUC         : 0.7476
+Prediction time     : 1.7642 s
+Peak GPU memory     : 379.32 MB
