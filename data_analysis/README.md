@@ -9,13 +9,12 @@ Analyze and explore the network flow IDS dataset with Jupyter notebooks.
 
 ```bash
 uv sync
-uv run ipython kernel install --user --env VIRTUAL_ENV $(pwd)/.venv --name=project
 ```
 
-## 2. Start Jupyter Lab
+## 2. Start Kernel
 
 ```bash
-uv run --with jupyter jupyter lab
+uv run ipython kernel install --user --env VIRTUAL_ENV $(pwd)/.venv --name=project
 ```
 
 ## 3. Run the Analysis
