@@ -66,6 +66,11 @@ The hardware used for training and testing the models is the following.
 
 Navigate to the relevant subfolder and follow the instructions in its local README.md to execute that phase of the project.
 
+To update venv run inside phase folder:
+```bash
+source .venv/bin/activate
+```
+
 ---
 
 ## 3. License
