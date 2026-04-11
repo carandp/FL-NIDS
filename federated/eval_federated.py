@@ -112,6 +112,7 @@ def build_loaders(args):
         fraction=args.fraction,
         data_type=args.data_type,
         seed=args.seed,
+        client_id=None,  # eval_federated uses centralized datasets, not fed_clients
     )
 
     ndim_in = dataset.num_node_features

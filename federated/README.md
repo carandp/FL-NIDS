@@ -13,15 +13,21 @@ uv sync && uv run python gen_config.py
 
 ---
 
-## 2. Set up and start the POC environment
+## 2. Change Kernel (if needed)
+
+```bash
+source .venv/bin/activate
+```
+
+---
+
+## 3. Set up and start the POC environment
 
 The first time (or after deleting `poc_workspace/`):
 
 ```bash
 uv run nvflare poc prepare -i ./project.yml -d .
 ```
-
-> By default the project.yml that builds the PoC has 2 clients, the job meta.json too.
 
 Link job directory
 
@@ -39,7 +45,7 @@ You will see a `>` prompt — this is the NVFlare admin console.
 
 ---
 
-## 3. Submit the job
+## 4. Submit the job
 
 At the `>` prompt:
 
@@ -57,7 +63,7 @@ Training progress is printed to the same terminal. Each round logs the local epo
 
 ---
 
-## 4. Download the trained model
+## 5. Download the trained model
 
 Once all rounds complete (you will see `FINISHED:COMPLETED` in the logs), download the job output at the `>` prompt:
 
@@ -81,7 +87,7 @@ uv run nvflare poc stop
 
 ---
 
-## 5. Evaluate the model
+## 6. Evaluate the model
 
 ```bash
 uv run python eval_federated.py \

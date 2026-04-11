@@ -5,6 +5,7 @@ description = "Federated learning self-supervised GNN for Network Intrusion Dete
 readme = "README.md"
 requires-python = "==3.11.*"
 dependencies = [
+    "fastparquet>=2026.3.0",
     "numpy>=2.4.2",
     "nvflare>=2.7.1",
     "pandas>=3.0.1",

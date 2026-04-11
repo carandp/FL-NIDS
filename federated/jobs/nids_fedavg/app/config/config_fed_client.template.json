@@ -6,8 +6,7 @@
       "executor": {
         "path": "nids_trainer.NIDSTrainer",
         "args": {
-          "data_dir": "/home/<username>/FL-NIDS/datasets/",
-          "dataset_name": "NF-CSE-CIC-IDS2018-v3",
+          "data_dir": "/home/<username>/FL-NIDS/datasets/fed_clients/{SITE_NAME}",
           "local_epochs": 2,
           "batch_size": 16384,
           "ae_batch_size": 64,
@@ -26,7 +25,7 @@
           "agg_type": "mean",
           "mask_ratio": 0.15,
           "positional_encoding": null,
-          "fraction": 0.2
+          "client_id": "{SITE_NAME}"
         }
       }
     }

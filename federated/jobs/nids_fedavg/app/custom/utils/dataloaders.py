@@ -58,16 +58,22 @@ class NetFlowDataset:
         fraction=None,
         data_type="benign",
         seed=42,
+        client_id=None,
     ):
         self.name = name
         self.data_dir = data_dir
         self.fraction = fraction
         self.data_type = data_type
         self.seed = seed
+        self.client_id = client_id
 
         # Setup directories
         graph_dir = os.path.join(data_dir, "pyg_graph_data")
-        if fraction is not None:
+        
+        # When loading from fed_clients, use client_id in directory name
+        if client_id is not None:
+            self.processed_dir = os.path.join(graph_dir, f"client_{client_id}")
+        elif fraction is not None:
             assert 0 < fraction < 1
             fraction_str = str(fraction).replace(".", "_")
             self.processed_dir = os.path.join(graph_dir, f"{name}_{fraction_str}")
@@ -137,35 +143,43 @@ class NetFlowDataset:
         return False
 
     def _process(self):
-        """Process the raw CSV data and create train/val/test splits"""
+        """Process the raw data (CSV or Parquet) and create train/val/test splits"""
         print(f"Processing dataset {self.name}...")
 
         os.makedirs(self.processed_dir, exist_ok=True)
 
-        csv_path = os.path.join(self.raw_dir, f"{self.name}.csv")
-        timestamp_cols = {"FLOW_START_MILLISECONDS", "FLOW_END_MILLISECONDS"}
-        chunks = []
-        for chunk in pd.read_csv(csv_path, chunksize=500_000):
-            for col in chunk.select_dtypes(include=["float64"]).columns:
-                chunk[col] = chunk[col].astype(np.float32)
-            for col in chunk.select_dtypes(include=["int64"]).columns:
-                if col in timestamp_cols:
-                    continue
-                elif col == "Label":
-                    chunk[col] = chunk[col].astype(np.int8)
-                else:
-                    chunk[col] = chunk[col].astype(np.int32)
-            chunks.append(chunk)
-        df = pd.concat(chunks, ignore_index=True)
-        del chunks
+        # Load data from parquet (fed_clients) or CSV (raw directory)
+        if self.client_id is not None:
+            # Load from fed_clients parquet
+            parquet_path = os.path.join(self.data_dir, f"{self.client_id}.parquet")
+            print(f"Loading parquet from: {parquet_path}")
+            df = pd.read_parquet(parquet_path, engine="fastparquet")
+        else:
+            # Load from raw CSV with chunking
+            csv_path = os.path.join(self.raw_dir, f"{self.name}.csv")
+            timestamp_cols = {"FLOW_START_MILLISECONDS", "FLOW_END_MILLISECONDS"}
+            chunks = []
+            for chunk in pd.read_csv(csv_path, chunksize=500_000):
+                for col in chunk.select_dtypes(include=["float64"]).columns:
+                    chunk[col] = chunk[col].astype(np.float32)
+                for col in chunk.select_dtypes(include=["int64"]).columns:
+                    if col in timestamp_cols:
+                        continue
+                    elif col == "Label":
+                        chunk[col] = chunk[col].astype(np.int8)
+                    else:
+                        chunk[col] = chunk[col].astype(np.int32)
+                chunks.append(chunk)
+            df = pd.concat(chunks, ignore_index=True)
+            del chunks
 
-        if self.fraction is not None:
-            df = df.groupby(by="Attack").sample(
-                frac=self.fraction, random_state=self.seed
-            )
+            if self.fraction is not None:
+                df = df.groupby(by="Attack").sample(
+                    frac=self.fraction, random_state=self.seed
+                )
 
-        x = df.drop(columns=["Attack", "Label"])
-        y = df[["Attack", "Label"]]
+        x = df.drop(columns=["Attack", "Label"], errors="ignore")
+        y = df[["Attack", "Label"]] if all(col in df.columns for col in ["Attack", "Label"]) else None
 
         x = x.replace([np.inf, -np.inf], np.nan)
         x = x.fillna(0)
@@ -189,10 +203,21 @@ class NetFlowDataset:
                 if col not in ["IPV4_SRC_ADDR", "IPV4_DST_ADDR"]
             ]
 
-        df = pd.concat([x, y], axis=1)
+        # Reconstruct df with features and labels
+        if y is not None:
+            df = pd.concat([x, y], axis=1)
+            stratify_col = y["Attack"]
+        else:
+            # For parquet from fed_clients, create Attack and Label columns if missing
+            df = x.copy()
+            if "Label" not in df.columns:
+                df["Label"] = 0
+            if "Attack" not in df.columns:
+                df["Attack"] = "Benign"
+            stratify_col = df["Attack"]
 
         df_train, df_val_test = train_test_split(
-            df, test_size=0.2, random_state=self.seed, stratify=y["Attack"]
+            df, test_size=0.2, random_state=self.seed, stratify=stratify_col
         )
 
         if self.data_type == "benign":
