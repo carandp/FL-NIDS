@@ -1,0 +1,47 @@
+(federated) carandp@DESKTOP-2TD7K2T:~/FL-NIDS/federated$ uv run python eval_federated.py \
+    --model jobs/af740277-707a-43bb-89ec-88e5a1383809/workspace/app_server/FL_global_model.pt
+Node features: 49  |  Edge features: 49
+Loaded FL model from: jobs/af740277-707a-43bb-89ec-88e5a1383809/workspace/app_server/FL_global_model.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.001054
+Evaluating on test set...
+
+Test macro F1-score : 0.7974
+Test PR-AUC         : 0.5537
+Prediction time     : 2.1033 s
+
+Run history (client0):
+    train_loss █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▂▃▁▁▂▂▃▃▃▄▄▄▄▅▅▆▇▇██
+  val_macro_f1 ▃▃▁▁▂▃▄▄▅▅▅▅▆▆▇█▇███
+
+Run summary:
+    train_loss 0.00186034
+      val_loss 0.000769471
+    val_pr_auc 0.825084
+  val_macro_f1 0.910204
+
+Run history (client1):
+    train_loss █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▂▅▂▁▁▂▂▃▃▄▅▆▇▇███▇▇▇
+  val_macro_f1 ▁▄▅▅▅▅▅▅▅▅▆▆▆▆▆▆▆▆▇█
+
+Run summary:
+    train_loss 0.00210744
+      val_loss 0.00100873
+    val_pr_auc 0.940685
+  val_macro_f1 0.950906
+
+Run history (client2):
+    train_loss █▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▄▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▂▂▃▃▃▄▄▄▅▅▅▅▆▇▇████
+  val_macro_f1 ▁▁▁▁▂▃▃▃▃▄▄▅▅▆▆▇▇███
+
+Run summary:
+    train_loss 0.0016528
+      val_loss 0.000481648
+    val_pr_auc 0.550701
+  val_macro_f1 0.606846

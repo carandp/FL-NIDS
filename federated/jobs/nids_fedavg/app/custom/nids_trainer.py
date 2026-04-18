@@ -175,7 +175,7 @@ class NIDSTrainer(Executor):
         self.log_info(
             fl_ctx,
             f"Round {current_round} — global model: val_pr_auc={val_pr_auc:.4f}, "
-            f"val_f1={val_f1:.4f}, threshold={threshold:.6f}",
+            f"val_macro_f1={val_f1:.4f}, threshold={threshold:.6f}",
         )
 
         if val_pr_auc >= self.best_val_pr_auc:
@@ -187,7 +187,7 @@ class NIDSTrainer(Executor):
                     "model_state_dict": self.model.state_dict(),
                     "round": current_round,
                     "val_pr_auc": val_pr_auc,
-                    "val_f1": val_f1,
+                    "val_macro_f1": val_f1,
                     "threshold": threshold,
                 },
                 ckpt_path,
@@ -229,7 +229,7 @@ class NIDSTrainer(Executor):
             fl_ctx,
             f"Round {current_round} complete — "
             f"train_loss={total_train_loss:.6f}, val_loss={val_loss_local:.6f}, "
-            f"val_pr_auc={val_pr_auc_local:.4f}, val_f1={val_f1_local:.4f}",
+            f"val_pr_auc={val_pr_auc_local:.4f}, val_macro_f1={val_f1_local:.4f}",
         )
         self.log_info(fl_ctx, separator)
 
@@ -239,7 +239,7 @@ class NIDSTrainer(Executor):
             "train_loss": total_train_loss,
             "val_loss": val_loss_local,
             "val_pr_auc": val_pr_auc_local,
-            "val_f1": val_f1_local,
+            "val_macro_f1": val_f1_local,
         })
         os.makedirs(self.checkpoint_dir, exist_ok=True)
         metrics_path = os.path.join(self.checkpoint_dir, f"metrics_history_{site_name}.json")

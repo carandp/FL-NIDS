@@ -4,8 +4,7 @@ PTFileModelPersistor.  Reuses the centralized test/validate utilities.
 
 Usage (from the federated/ directory):
     uv run python eval_federated.py \
-        --model path/to/FL_global_model.pt \
-        --dataset NF-CSE-CIC-IDS2018-v3
+        --model path/to/FL_global_model.pt
 """
 
 import argparse
@@ -43,7 +42,7 @@ def print_run_history(metrics_path: str) -> None:
     if not history:
         return
 
-    keys = ["train_loss", "val_loss", "val_pr_auc", "val_f1"]
+    keys = ["train_loss", "val_loss", "val_pr_auc", "val_macro_f1"]
     col_w = max(len(k) for k in keys)
     site = os.path.basename(metrics_path).replace("metrics_history_", "").replace(".json", "")
 
@@ -74,13 +73,14 @@ def print_all_metrics(prod_root: str) -> None:
             print_run_history(metrics_path)
 
 
+
 # Make centralized utilities importable from the federated/ directory
 _CENTRALIZED = os.path.join(os.path.dirname(__file__), "..", "centralized")
 sys.path.insert(0, os.path.abspath(_CENTRALIZED))
 
 from models.graphids import GraphIDS  # noqa: E402
-from utils.dataloaders import NetFlowDataset  # noqa: E402
 from utils.trainers import find_threshold, test, validate  # noqa: E402
+from torch_geometric.data import Data
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -98,18 +98,45 @@ def load_fl_model(model_path: str, model: GraphIDS) -> GraphIDS:
     return model
 
 
-def build_loaders(args):
-    dataset = NetFlowDataset(
-        name=args.dataset,
-        data_dir=args.data_dir,
-        force_reload=args.reload_dataset,
-        fraction=args.fraction,
-        data_type=args.data_type,
-        seed=args.seed,
-    )
+def load_and_merge_client_graphs(split, client_dirs):
+    datas = []
+    for client_dir in client_dirs:
+        split_path = os.path.join(client_dir, f"{split}.pt")
+        if os.path.exists(split_path):
+            data = torch.load(split_path)[0]
+            datas.append(data)
+    # Merge edge_index, edge_attr, edge_labels, x, num_nodes
+    # Assume all have same feature dimensions
+    if not datas:
+        raise RuntimeError(f"No data found for split {split} in clients: {client_dirs}")
+    # Remap node indices to avoid collisions
+    node_offset = 0
+    edge_index_list, edge_attr_list, edge_labels_list = [], [], []
+    x_list = []
+    for data in datas:
+        num_nodes = data.num_nodes
+        edge_index_list.append(data.edge_index + node_offset)
+        edge_attr_list.append(data.edge_attr)
+        edge_labels_list.append(data.edge_labels)
+        x_list.append(data.x)
+        node_offset += num_nodes
+    edge_index = torch.cat(edge_index_list, dim=1)
+    edge_attr = torch.cat(edge_attr_list, dim=0)
+    edge_labels = torch.cat(edge_labels_list, dim=0)
+    x = torch.cat(x_list, dim=0)
+    merged = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, edge_labels=edge_labels, num_nodes=x.shape[0])
+    return merged
 
-    ndim_in = dataset.num_node_features
-    edim_in = dataset.num_edge_features
+def build_loaders(args):
+    fed_clients_root = os.path.abspath(os.path.join(args.data_dir, "fed_clients"))
+    client_dirs = [
+        os.path.join(fed_clients_root, f"client{i}", "pyg_graph_data", f"client_client{i}")
+        for i in range(3)
+    ]
+    val_graph = load_and_merge_client_graphs("val", client_dirs)
+    test_graph = load_and_merge_client_graphs("test", client_dirs)
+    ndim_in = val_graph.x.shape[1]
+    edim_in = val_graph.edge_attr.shape[1]
     print(f"Node features: {ndim_in}  |  Edge features: {edim_in}")
 
     fanout_list = [args.fanout] if args.fanout != -1 else [-1]
@@ -117,10 +144,10 @@ def build_loaders(args):
     shuffle = args.positional_encoding == "None"
 
     val_loader = LinkNeighborLoader(
-        data=dataset.val_graph,
+        data=val_graph,
         num_neighbors=fanout_list,
-        edge_label_index=dataset.val_graph.edge_index,
-        edge_label=dataset.val_graph.edge_labels,
+        edge_label_index=val_graph.edge_index,
+        edge_label=val_graph.edge_labels,
         batch_size=args.batch_size,
         shuffle=shuffle,
         num_workers=num_workers,
@@ -129,10 +156,10 @@ def build_loaders(args):
         drop_last=False,
     )
     test_loader = LinkNeighborLoader(
-        data=dataset.test_graph,
+        data=test_graph,
         num_neighbors=fanout_list,
-        edge_label_index=dataset.test_graph.edge_index,
-        edge_label=dataset.test_graph.edge_labels,
+        edge_label_index=test_graph.edge_index,
+        edge_label=test_graph.edge_labels,
         batch_size=args.batch_size,
         shuffle=shuffle,
         num_workers=num_workers,
@@ -144,6 +171,7 @@ def build_loaders(args):
     return val_loader, test_loader, ndim_in, edim_in
 
 
+
 def main():
     parser = argparse.ArgumentParser(description="Evaluate a federated FL_global_model.pt")
     parser.add_argument(
@@ -152,17 +180,6 @@ def main():
     )
     # Use datasets directory at the project root
     DATASETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "datasets"))
-    parser.add_argument(
-        "--dataset", type=str, default="NF-CSE-CIC-IDS2018-v3",
-        choices=["NF-UNSW-NB15-v3", "NF-CSE-CIC-IDS2018-v3",
-                 "NF-UNSW-NB15-v2", "NF-CSE-CIC-IDS2018-v2"],
-    )
-    parser.add_argument("--data_type", type=str, default="benign",
-                        choices=["benign", "mixed"])
-    parser.add_argument("--fraction", type=float, default=0.2,
-                        help="Fraction of the dataset to load (default: 0.2 to reuse the FL training cache; "
-                             "pass a different value + --reload_dataset to reprocess)")
-    parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--batch_size", type=int, default=16384)
     parser.add_argument("--ae_batch_size", type=int, default=64)
     parser.add_argument("--window_size", type=int, default=512)
@@ -183,7 +200,6 @@ def main():
                         help="How to derive the anomaly threshold from the validation set")
     parser.add_argument("--save_curve", action="store_true",
                         help="Save precision-recall curve as .npz")
-    parser.add_argument("--reload_dataset", action="store_true")
     args = parser.parse_args()
     args.data_dir = DATASETS_DIR
     PROD_ROOT = os.path.abspath(

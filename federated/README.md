@@ -89,8 +89,7 @@ shutdown all
 
 ```bash
 uv run python eval_federated.py \
-    --model jobs/<job_id>/workspace/app_server/FL_global_model.pt \
-    --dataset NF-CSE-CIC-IDS2018-v3
+    --model jobs/<job_id>/workspace/app_server/FL_global_model.pt
 ```
 
 The script derives an anomaly threshold from the validation set and reports:

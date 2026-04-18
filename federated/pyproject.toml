@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = "==3.11.*"
 dependencies = [
     "fastparquet>=2026.3.0",
+    "matplotlib>=3.10.8",
     "numpy>=2.4.2",
     "nvflare>=2.7.1",
     "pandas>=3.0.1",
