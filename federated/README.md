@@ -77,12 +77,10 @@ This extracts the workspace to:
 jobs/<job_id>/workspace/app_server/FL_global_model.pt
 ```
 
-Type `bye` to exit the admin console.
-
 Stop the POC environment:
 
 ```bash
-uv run nvflare poc stop
+shutdown all
 ```
 
 ---
@@ -101,13 +99,4 @@ The script derives an anomaly threshold from the validation set and reports:
 Test macro F1-score : 0.XXXX
 Test PR-AUC         : 0.XXXX
 Prediction time     : X.XXXX s
-Peak GPU memory     : XXX.XX MB
 ```
-
-### Optional flags
-
-| Flag | Description |
-|---|---|
-| `--threshold_method unsupervised` | Use MAD-based threshold instead of best-F1 search |
-| `--save_curve` | Save precision-recall curve to `curves/` as `.npz` |
-| `--fraction 0.2` | Default — reuses the cached processed dataset from training |

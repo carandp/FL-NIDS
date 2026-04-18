@@ -8,23 +8,11 @@ participants:
     fed_learn_port: 8002
     admin_port: 8003
 
-  - name: dep1
+  - name: internal
     type: client
     org: uniandes
 
-  - name: dep2
-    type: client
-    org: uniandes
-
-  - name: dep3
-    type: client
-    org: uniandes
-
-  - name: dep4
-    type: client
-    org: uniandes
-
-  - name: dep5
+  - name: it
     type: client
     org: uniandes
 

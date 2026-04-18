@@ -64,18 +64,12 @@ def print_all_metrics(prod_root: str) -> None:
     if not os.path.isdir(prod_root):
         return
 
-    site_names = [
-        name
-        for name in sorted(os.listdir(prod_root))
-        if name.startswith("site-") and os.path.isdir(os.path.join(prod_root, name))
-    ]
-    for site_name in site_names:
-        metrics_path = os.path.join(
-            prod_root,
-            site_name,
-            "checkpoints",
-            f"metrics_history_{site_name}.json",
-        )
+    # Print metrics for all subdirectories with a metrics_history_<site>.json file in their checkpoints folder
+    for site_name in sorted(os.listdir(prod_root)):
+        site_path = os.path.join(prod_root, site_name)
+        if not os.path.isdir(site_path):
+            continue
+        metrics_path = os.path.join(site_path, "checkpoints", f"metrics_history_{site_name}.json")
         if os.path.isfile(metrics_path):
             print_run_history(metrics_path)
 
@@ -112,7 +106,6 @@ def build_loaders(args):
         fraction=args.fraction,
         data_type=args.data_type,
         seed=args.seed,
-        client_id=None,  # eval_federated uses centralized datasets, not fed_clients
     )
 
     ndim_in = dataset.num_node_features
@@ -157,8 +150,8 @@ def main():
         "--model", type=str, required=True,
         help="Path to FL_global_model.pt produced by NVFlare PTFileModelPersistor",
     )
-    # Hardcode centralized datasets directory
-    CENTRALIZED_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "centralized", "datasets"))
+    # Use datasets directory at the project root
+    DATASETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "datasets"))
     parser.add_argument(
         "--dataset", type=str, default="NF-CSE-CIC-IDS2018-v3",
         choices=["NF-UNSW-NB15-v3", "NF-CSE-CIC-IDS2018-v3",
@@ -192,7 +185,7 @@ def main():
                         help="Save precision-recall curve as .npz")
     parser.add_argument("--reload_dataset", action="store_true")
     args = parser.parse_args()
-    args.data_dir = CENTRALIZED_DATA_DIR
+    args.data_dir = DATASETS_DIR
     PROD_ROOT = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "poc_workspace", "fl_nids", "prod_00")
     )
