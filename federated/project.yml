@@ -2,33 +2,33 @@ api_version: 3
 name: fl_nids
 
 participants:
-  - name: server
+  - name: fedserver
     type: server
     org: uniandes
     fed_learn_port: 8002
     admin_port: 8003
 
-  - name: Dep1
+  - name: dep1
     type: client
     org: uniandes
 
-  - name: Dep2
+  - name: dep2
     type: client
     org: uniandes
 
-  - name: Dep3
+  - name: dep3
     type: client
     org: uniandes
 
-  - name: Dep4
+  - name: dep4
     type: client
     org: uniandes
 
-  - name: Dep5
+  - name: dep5
     type: client
     org: uniandes
 
-  - name: Servers
+  - name: servers
     type: client
     org: uniandes
 

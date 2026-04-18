@@ -4,19 +4,19 @@
 
 ---
 
-## 1. Install dependencies and setup
+## 1. Change Kernel (if needed)
 
 ```bash
-cd federated/
-uv sync && uv run python gen_config.py
+source .venv/bin/activate
 ```
 
 ---
 
-## 2. Change Kernel (if needed)
+## 2. Install dependencies and setup
 
 ```bash
-source .venv/bin/activate
+cd federated/
+uv sync && uv run python gen_config.py
 ```
 
 ---
