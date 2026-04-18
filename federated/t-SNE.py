@@ -1,23 +1,21 @@
-
 import sys
 import os
+from matplotlib.patches import Patch
+
 # Add custom federated app path for imports
 FED_CUSTOM_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "jobs/nids_fedavg/app/custom"))
 if FED_CUSTOM_PATH not in sys.path:
     sys.path.insert(0, FED_CUSTOM_PATH)
 
+from matplotlib.lines import Line2D
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
-
-# Import graph loader and model
-
-# Import federated custom data/model
+from scipy.stats import gaussian_kde
 from utils.dataloaders import NetFlowDataset
 from graphids_model import GraphIDS
-
 
 
 # -----------------------------
@@ -25,7 +23,7 @@ from graphids_model import GraphIDS
 # -----------------------------
 dataset = NetFlowDataset(
     name="NF-CSE-CIC-IDS2018-v3",
-    data_dir="/home/carandp/FL-NIDS/datasets/fed_clients/client0",
+    data_dir=os.path.abspath(os.path.join(os.path.dirname(__file__), "../datasets/fed_clients/client0")),
     force_reload=False,
     data_type="benign",
     seed=42,
@@ -63,7 +61,8 @@ model = GraphIDS(
 )
 
 
-ckpt = torch.load("poc_workspace/fl_nids/prod_00/client0/checkpoints/best_global_model_client0.pt", map_location=device)
+ckpt_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../federated/poc_workspace/fl_nids/prod_00/client0/checkpoints/best_global_model_client0.pt"))
+ckpt = torch.load(ckpt_path, map_location=device)
 if "model_state_dict" in ckpt:
     model.load_state_dict(ckpt["model_state_dict"], strict=True)
 elif "state_dict" in ckpt:
@@ -134,28 +133,95 @@ Z_edge = run_tsne(H_edge)
 Z_rec = run_tsne(H_rec)
 
 # -----------------------------
-# 6) Plot
+# 6) Plot (Improved - Best Combo)
 # -----------------------------
-classes = np.unique(y_attack)
-colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
+# Map binary labels to names
+label_map = {0: "Benign", 1: "Attack"}
+y_names = np.array([label_map.get(int(v), str(v)) for v in y_attack])
 
+# -----------------------------
+# Downsample + Balance
+# -----------------------------
+max_per_class = 4000  # adjust if needed
+indices = []
 
-# Plot edge embeddings and their reconstructions by attack type
+for cls in np.unique(y_names):
+    cls_idx = np.where(y_names == cls)[0]
+    if len(cls_idx) > max_per_class:
+        cls_idx = np.random.choice(cls_idx, max_per_class, replace=False)
+    indices.extend(cls_idx)
+
+indices = np.array(indices)
+
+Z_edge = Z_edge[indices]
+Z_rec = Z_rec[indices]
+y_names = y_names[indices]
+
+# -----------------------------
+# Plotting
+# -----------------------------
 fig, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=120)
 
-for ax, Z, title in [
+plots = [
     (axes[0], Z_edge, "Edge Embeddings (t-SNE)"),
     (axes[1], Z_rec, "Reconstructed Edge Embeddings (t-SNE)")
-]:
-    for i, cls in enumerate(classes):
-        idx = y_attack == cls
-        ax.scatter(Z[idx, 0], Z[idx, 1], s=14, alpha=0.8, label=cls, color=colors[i % len(colors)])
+]
+
+for ax, Z, title in plots:
+    benign_idx = y_names == "Benign"
+    attack_idx = y_names == "Attack"
+
+    # Benign → density (hexbin)
+    hb = ax.hexbin(
+        Z[benign_idx, 0],
+        Z[benign_idx, 1],
+        gridsize=55,
+        cmap="Blues",
+        mincnt=1,
+        alpha=0.65
+    )
+
+    # Attack → scatter overlay
+    ax.scatter(
+        Z[attack_idx, 0],
+        Z[attack_idx, 1],
+        s=14,
+        color="#ed8936",
+        alpha=0.9,
+        label="Attack"
+    )
+
+    # Optional: light contour for structure
+    try:
+        if np.sum(benign_idx) > 50:
+            xy = np.vstack([Z[benign_idx, 0], Z[benign_idx, 1]])
+            kde = gaussian_kde(xy)
+
+            xx, yy = np.meshgrid(
+                np.linspace(Z[:, 0].min(), Z[:, 0].max(), 150),
+                np.linspace(Z[:, 1].min(), Z[:, 1].max(), 150)
+            )
+            zz = kde(np.vstack([xx.ravel(), yy.ravel()])).reshape(xx.shape)
+
+            ax.contour(xx, yy, zz, levels=6, colors="navy", alpha=0.4, linewidths=0.8)
+    except Exception:
+        pass  # KDE can fail on degenerate distributions
+
     ax.set_title(title)
     ax.set_xlabel("t-SNE dimension 1")
     ax.set_ylabel("t-SNE dimension 2")
     ax.grid(True, linestyle="--", alpha=0.25)
-    ax.legend(title="Attack Types", fontsize=8, title_fontsize=9, loc="upper center", ncol=4)
+
+    # Custom legend handles
+    legend_elements = [
+        Patch(facecolor="#2b6cb0", edgecolor="none", alpha=0.65, label="Benign"),
+        Line2D([0], [0], marker='o', color='w', label='Attack',
+            markerfacecolor="#ed8936", markersize=8)
+    ]
+
+    ax.legend(handles=legend_elements, title="Class", loc="upper center")
 
 plt.tight_layout()
+plt.savefig("tSNE_client0.png", dpi=150, bbox_inches="tight")
 plt.show()
