@@ -81,12 +81,11 @@ model.eval()
 # 4) Extract embeddings
 #    Adapt the forward call to your model
 # -----------------------------
-# --- Extract both node and edge embeddings ---
-node_embs = []
+
+# --- Extract edge embeddings and their reconstructions ---
 edge_embs = []
 recon_embs = []
 attacks = []
-
 
 with torch.no_grad():
     for batch in graph_loader:
@@ -98,32 +97,14 @@ with torch.no_grad():
         )
         edge_embs.append(edge_embedding.detach().cpu())
 
-        # For node embeddings, we can use the mean of the edge embeddings for each node (source or target), or just use the node representations from the encoder
-        # Here, we use the source node representations from the edge embedding pairs
-        # Get unique node indices from edge_index
-        node_indices = torch.unique(batch.edge_index)
-        # For each node, take the mean of all edge embeddings where it appears as source or target
-        node_to_edges = {int(node.item()): [] for node in node_indices}
-        for i, (src, dst) in enumerate(batch.edge_index.T):
-            node_to_edges[int(src.item())].append(i)
-            node_to_edges[int(dst.item())].append(i)
-        node_emb_matrix = []
-        for node in range(batch.num_nodes):
-            edge_ids = node_to_edges.get(node, [])
-            if edge_ids:
-                node_emb_matrix.append(edge_embedding[edge_ids].mean(dim=0))
-            else:
-                # If node has no edges, fill with zeros
-                node_emb_matrix.append(torch.zeros(edge_embedding.shape[1], device=edge_embedding.device))
-        node_emb_matrix = torch.stack(node_emb_matrix, dim=0)
-        node_embs.append(node_emb_matrix.detach().cpu())
-
-        # Reconstructed (autoencoder) embeddings for nodes
-        recon = model.transformer(node_emb_matrix.unsqueeze(0)).squeeze(0)
+        # Reconstructed (autoencoder) embeddings for edges
+        # Pass edge embeddings through transformer (unsqueeze for batch dim)
+        recon = model.transformer(edge_embedding.unsqueeze(0)).squeeze(0)
         recon_embs.append(recon.detach().cpu())
 
         # Use edge_labels as attack labels for plotting (for edge embeddings)
         attacks.append(batch.edge_labels.detach().cpu())
+
 
 
 if len(attacks) > 0:
@@ -132,13 +113,13 @@ else:
     y_attack = np.array([])
 
 # Prepare embedding matrices for t-SNE
-H_node = torch.cat(node_embs, dim=0).numpy()
 H_edge = torch.cat(edge_embs, dim=0).numpy()
 H_rec = torch.cat(recon_embs, dim=0).numpy()
 
 # -----------------------------
 # 5) t-SNE
 # -----------------------------
+
 def run_tsne(Z, seed=42):
     Z = StandardScaler().fit_transform(Z)
     return TSNE(
@@ -149,8 +130,6 @@ def run_tsne(Z, seed=42):
         random_state=seed
     ).fit_transform(Z)
 
-
-Z_node = run_tsne(H_node)
 Z_edge = run_tsne(H_edge)
 Z_rec = run_tsne(H_rec)
 
@@ -161,12 +140,13 @@ classes = np.unique(y_attack)
 colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
 
-fig, axes = plt.subplots(1, 3, figsize=(21, 6), dpi=120)
+
+# Plot edge embeddings and their reconstructions by attack type
+fig, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=120)
 
 for ax, Z, title in [
-    (axes[0], Z_node, "Node Embeddings (t-SNE)"),
-    (axes[1], Z_edge, "Edge Embeddings by Attack Type"),
-    (axes[2], Z_rec, "Reconstructed Node Embeddings")
+    (axes[0], Z_edge, "Edge Embeddings (t-SNE)"),
+    (axes[1], Z_rec, "Reconstructed Edge Embeddings (t-SNE)")
 ]:
     for i, cls in enumerate(classes):
         idx = y_attack == cls
