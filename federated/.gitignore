@@ -27,9 +27,3 @@ jobs/*
 
 # Generated config files
 jobs/nids_fedavg/app/config/config_fed_client.json
-jobs/nids_fedavg/app/config/config_fed_client_site-1.json
-jobs/nids_fedavg/app/config/config_fed_client_site-2.json
-jobs/nids_fedavg/app/config/config_fed_client_site-3.json
-jobs/nids_fedavg/app/config/config_fed_client_site-4.json
-jobs/nids_fedavg/app/config/config_fed_client_site-5.json
-jobs/nids_fedavg/app/config/config_fed_client_site-6.json

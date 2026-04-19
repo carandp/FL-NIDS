@@ -117,5 +117,6 @@ uv run python gen_tSNE_clients.py
 or
 
 ```bash
-uv run python gen_tSNE_server.py
+uv run python gen_tSNE_server.py \
+        --job <job_id>
 ```
