@@ -12,7 +12,7 @@ from nvflare.apis.fl_constant import ReturnCode
 from nvflare.apis.fl_context import FLContext
 from nvflare.apis.shareable import Shareable, make_reply
 from nvflare.apis.signal import Signal
-from nvflare.apis.dxo import DXO, DataKind, from_shareable as dxo_from_shareable
+from nvflare.apis.dxo import DXO, DataKind, MetaKey, from_shareable as dxo_from_shareable
 
 from graphids_model import GraphIDS
 from utils.dataloaders import SequentialDataset, collate_fn
@@ -149,16 +149,25 @@ class NIDSTrainer(Executor):
 
         # --- 1. Pull global weights from server (arrive as numpy arrays) ---
         dxo = dxo_from_shareable(shareable)
-        global_params = {
-            k: torch.tensor(v, dtype=torch.float32).to(device)
-            for k, v in dxo.data.items()
-        }
+        model_state = self.model.state_dict()
+        global_params = {}
+        for k, v in dxo.data.items():
+            expected = model_state[k]
+            t = torch.tensor(v, dtype=torch.float32, device=device)
+            # HE decryptor can return flattened vectors; restore original param shapes.
+            if t.shape != expected.shape:
+                if t.numel() != expected.numel():
+                    raise RuntimeError(
+                        f"Received param '{k}' with {t.numel()} values, expected {expected.numel()}"
+                    )
+                t = t.reshape(expected.shape)
+            global_params[k] = t
         self.model.load_state_dict(global_params)
 
         # Snapshot before training for diff computation
         global_weights = {k: v.clone().cpu() for k, v in global_params.items()}
 
-        current_round = dxo.get_meta_prop("current_round", 0)
+        current_round = dxo.get_meta_prop(MetaKey.CURRENT_ROUND, 0)
 
         # --- 2. Validate global model and save best checkpoint ---
         _, val_errors, val_labels = validate(
@@ -258,7 +267,7 @@ class NIDSTrainer(Executor):
         out_dxo = DXO(
             data_kind=DataKind.WEIGHT_DIFF,
             data=weight_diff,
-            meta={"num_steps_current_round": num_samples},
+            meta={MetaKey.NUM_STEPS_CURRENT_ROUND: num_samples},
         )
         return out_dxo.to_shareable()
 

@@ -318,7 +318,7 @@ wheels = [
 ]
 
 [[package]]
-name = "federated"
+name = "federated-hard"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
@@ -331,6 +331,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "scikit-learn" },
     { name = "scipy" },
+    { name = "tenseal" },
     { name = "torch" },
     { name = "torch-geometric" },
     { name = "torch-scatter" },
@@ -352,6 +353,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "scikit-learn", specifier = ">=1.8.0" },
     { name = "scipy", specifier = ">=1.17.1" },
+    { name = "tenseal", specifier = ">=0.3.16" },
     { name = "torch", specifier = "==2.8.0" },
     { name = "torch-geometric", specifier = "==2.7.0" },
     { name = "torch-scatter", specifier = ">=2.1.2", index = "https://data.pyg.org/whl/torch-2.8.0+cu128.html" },
@@ -1300,6 +1302,17 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/83/d3/803453b36afefb7c2bb238361cd4ae6125a569b4db67cd9e79846ba2d68c/sympy-1.14.0.tar.gz", hash = "sha256:d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517", size = 7793921, upload-time = "2025-04-27T18:05:01.611Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl", hash = "sha256:e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5", size = 6299353, upload-time = "2025-04-27T18:04:59.103Z" },
+]
+
+[[package]]
+name = "tenseal"
+version = "0.3.16"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8e/39/b9460e0545ddb17193515581aaf77d672aa3c9b57a41107a40cb6479c357/tenseal-0.3.16-cp311-cp311-macosx_13_0_x86_64.whl", hash = "sha256:794b27425a8d46dd918119ee10ee8a1d06e4d48b155d7011807343dc8055871f", size = 3993599, upload-time = "2025-02-28T07:46:31.398Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/a5/d78f2bb1c11526874bd3759af03eaed0cbf402e436a0611e0bd4adaf49a1/tenseal-0.3.16-cp311-cp311-macosx_14_0_arm64.whl", hash = "sha256:0599fe98793084ccb2a2f10a9648d3aa2a199d86540e85de5a6693e48833d87d", size = 3440701, upload-time = "2025-02-28T08:03:02.176Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/ab/545fbcc136d2e35f333966837697349262f7d29cc5e5ebc2ee63abfd3724/tenseal-0.3.16-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:2815023756cb666369547d02cc6c4ec6fbe9971effa99015a4b0c0b8086669da", size = 4789108, upload-time = "2025-02-20T10:50:10.17Z" },
+    { url = "https://files.pythonhosted.org/packages/a5/a9/0c8d89a05764acdcbe732d60c7285c157b32c25eb055b3e1a607da218712/tenseal-0.3.16-cp311-cp311-win_amd64.whl", hash = "sha256:b89fd126d429b8cd2aa614e3bb5cf8c59199d739d5e22f5b534f651a05d20bed", size = 2154317, upload-time = "2025-02-28T07:47:10.659Z" },
 ]
 
 [[package]]

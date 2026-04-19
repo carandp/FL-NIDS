@@ -26,13 +26,22 @@ This folder contains the transition to Federated Learning using NVFlare.
 - **Goal.** Benchmark the performance of a distributed model without extra privacy layers.  
 - **Architecture.** Implements a controller-client integration where the FL controller assigns training tasks to multiple clients.
 
-### 1.3 federated_hard/
+### 1.3 federated_he/
 
-This folder contains the Hardened Federated Model.
+This folder contains the Hardened Federated Model with Secure Aggregation.
 
 - **Secure Aggregation (SA).** Cryptographic protection ensuring the server only sees combined updates, mitigating server-side data leakage.  
+
+### 1.4 federated_dp/
+
+This folder contains the Hardened Federated Model with Differential Privacy.
+
 - **Differential Privacy (DP).** Implementation of controlled random noise to protect against membership inference attacks.  
 - **Parametric Study.** Contains the 25 simulations varying the noise multiplier (σ) to generate accuracy-privacy trade-off curves.
+
+### 1.5 federated_hedp/
+
+This folder contains the Hardened Federated Model with both Secure Aggregation and Differential Privacy.
 
 ---
 

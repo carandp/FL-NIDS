@@ -1,6 +1,6 @@
 # Federated Learning — Quick Start Guide
 
-> **Prerequisites:** `uv` installed and the dataset available at `datasets/NF-CSE-CIC-IDS2018-v3/`. See the root README for setup details.
+> **Prerequisites:** `uv` installed and the dataset available at `datasets/fed_clients/`. The fed_clients folder is generated with data_analysis/data.ipynb.
 
 ---
 
@@ -26,13 +26,13 @@ uv sync && uv run python gen_config.py
 The first time (or after deleting `poc_workspace/`):
 
 ```bash
-uv run nvflare poc prepare -i ./project.yml -d .
+NVFLARE_POC_WORKSPACE=/home/<user>/FL-NIDS/federated/poc_workspace uv run nvflare poc prepare -i ./project.yml
 ```
 
 Link job directory
 
 ```bash
-uv run nvflare poc prepare-jobs-dir -j ./jobs
+NVFLARE_POC_WORKSPACE=/home/<user>/FL-NIDS/federated/poc_workspace uv run nvflare poc prepare-jobs-dir -j ./jobs
 ```
 
 Then start the server, client, and admin console together:

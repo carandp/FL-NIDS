@@ -1,0 +1,46 @@
+Node features: 49  |  Edge features: 49
+Detected HE checkpoint bytes. Decoding with context: /home/carandp/FL-NIDS/federated_he/poc_workspace/fl_nids/prod_00/client0/startup/client_context.tenseal
+Loaded FL model from: jobs/217ffc05-dc74-4438-81f6-14d70d24b17c/workspace/app_server/FL_global_model.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.000153
+Evaluating on test set...
+
+Test macro F1-score : 0.8215
+Test PR-AUC         : 0.5575
+Prediction time     : 2.0426 s
+
+Run history (client0):
+    train_loss █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▁▁▂▂▃▄▅▅▅▆▆▆▆▇▇▇▇▇▇▇▇▇▆▆▆▇▇▇▇▇▇▇▇▇▇▇▇▇▇██████████
+  val_macro_f1 ▁▂▁▂▃▄▅▆▇▇▇▇▇██████████▇▇▇▇▇███▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
+
+Run summary:
+    train_loss 4.95053e-05
+      val_loss 7.41925e-05
+    val_pr_auc 0.834011
+  val_macro_f1 0.870082
+
+Run history (client1):
+    train_loss █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▃▃▄▅▅▅▆▆▇▇▇▇█████████████████████████████████████
+  val_macro_f1 ▁▂▃▄▄▄▄▄▄▅▅▅▆▆▆▆▆▇▆▆▆▆▆▇▇▇▇▇▇▇▇▇▇▇████████████████
+
+Run summary:
+    train_loss 3.91073e-05
+      val_loss 8.85554e-05
+    val_pr_auc 0.981352
+  val_macro_f1 0.99417
+
+Run history (client2):
+    train_loss █▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▄▃▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▂▂▂▃▃▃▃▃▃▄▄▄▄▅▅▅▆▆▆▆▆▇▇▇▇▇██████████████████████▇
+  val_macro_f1 ▁▁▁▁▂▂▃▃▃▃▄▄▄▄▄▅▅▅▅▆▆▆▆▆▇▇▇▇▇▇▇███████████████████
+
+Run summary:
+    train_loss 2.98854e-05
+      val_loss 5.72943e-05
+    val_pr_auc 0.571221
+  val_macro_f1 0.657143

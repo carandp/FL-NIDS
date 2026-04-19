@@ -62,7 +62,7 @@ def plot_tsne_for_client(client_id):
         mask_ratio=0.15,
     )
     ckpt_path = os.path.abspath(os.path.join(
-        os.path.dirname(__file__), f"../federated/poc_workspace/fl_nids/prod_00/{client_id}/checkpoints/best_global_model_{client_id}.pt"
+        os.path.dirname(__file__), f"../federated_he/poc_workspace/fl_nids/prod_00/{client_id}/checkpoints/best_global_model_{client_id}.pt"
     ))
     ckpt = torch.load(ckpt_path, map_location=device)
     if "model_state_dict" in ckpt:

@@ -14,6 +14,7 @@ import sys
 
 import numpy as np
 import torch
+import tenseal as ts
 from sklearn.metrics import precision_recall_curve
 from torch_geometric.loader import LinkNeighborLoader
 
@@ -85,6 +86,63 @@ from torch_geometric.data import Data
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
+def _find_he_context(model_path: str) -> str | None:
+    """Try common locations for TenSEAL context that includes secret key."""
+    script_dir = os.path.dirname(__file__)
+    candidates = [
+        # Client contexts include the secret key and can decrypt HE vectors.
+        os.path.join(script_dir, "poc_workspace", "fl_nids", "prod_00", "client0", "startup", "client_context.tenseal"),
+        os.path.join(script_dir, "poc_workspace", "fl_nids", "prod_00", "client1", "startup", "client_context.tenseal"),
+        os.path.join(script_dir, "poc_workspace", "fl_nids", "prod_00", "client2", "startup", "client_context.tenseal"),
+        # Active local POC workspace
+        os.path.join(script_dir, "poc_workspace", "fl_nids", "prod_00", "server", "startup", "server_context.tenseal"),
+        # Same tree as downloaded model, if copied there manually
+        os.path.join(os.path.dirname(model_path), "client_context.tenseal"),
+        os.path.join(os.path.dirname(model_path), "server_context.tenseal"),
+        os.path.join(os.path.dirname(model_path), "..", "startup", "server_context.tenseal"),
+    ]
+    for p in candidates:
+        p = os.path.abspath(p)
+        if os.path.isfile(p):
+            return p
+    return None
+
+
+def _decode_he_state_dict(state_dict: dict, model: GraphIDS, context_path: str) -> dict:
+    """Decode HE-serialized bytes into tensors matching model parameter shapes."""
+    with open(context_path, "rb") as f:
+        ctx = ts.context_from(f.read())
+    try:
+        secret_key = ctx.secret_key()
+    except Exception as e:
+        raise RuntimeError(
+            f"TenSEAL context at '{context_path}' does not include a secret key; "
+            "use a client_context.tenseal file for evaluation."
+        ) from e
+
+    expected_state = model.state_dict()
+    decoded = {}
+    for name, value in state_dict.items():
+        if name not in expected_state:
+            continue
+
+        expected = expected_state[name]
+        if isinstance(value, bytes):
+            vec = ts.ckks_vector_from(ctx, value)
+            plain = vec.decrypt(secret_key=secret_key)
+            t = torch.tensor(plain, dtype=expected.dtype)
+        else:
+            t = torch.as_tensor(value, dtype=expected.dtype)
+
+        if t.numel() != expected.numel():
+            raise RuntimeError(
+                f"Decoded param '{name}' has {t.numel()} values, expected {expected.numel()}"
+            )
+        decoded[name] = t.reshape(expected.shape)
+
+    return decoded
+
+
 def load_fl_model(model_path: str, model: GraphIDS) -> GraphIDS:
     """Load weights from an NVFlare PTFileModelPersistor checkpoint.
 
@@ -93,6 +151,19 @@ def load_fl_model(model_path: str, model: GraphIDS) -> GraphIDS:
     """
     data = torch.load(model_path, map_location=device, weights_only=True)
     state_dict = data["model"] if "model" in data else data
+    # HE persistence stores tensors as serialized bytes. Detect and decode when needed.
+    has_he_bytes = any(isinstance(v, bytes) for v in state_dict.values())
+    if has_he_bytes:
+        context_path = _find_he_context(model_path)
+        if not context_path:
+            raise RuntimeError(
+                "Checkpoint appears HE-serialized (bytes), but no TenSEAL context file was found. "
+                "Expected client_context.tenseal in federated_he/poc_workspace/fl_nids/prod_00/client*/startup "
+                "or near the model file."
+            )
+        print(f"Detected HE checkpoint bytes. Decoding with context: {context_path}")
+        state_dict = _decode_he_state_dict(state_dict, model, context_path)
+
     model.load_state_dict(state_dict)
     print(f"Loaded FL model from: {model_path}")
     return model
