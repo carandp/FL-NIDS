@@ -318,7 +318,7 @@ wheels = [
 ]
 
 [[package]]
-name = "federated-hard"
+name = "federated-he"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

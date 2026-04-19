@@ -3,7 +3,7 @@ import json
 import matplotlib.pyplot as plt
 
 METRICS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "poc_workspace/fl_nids/prod_00"))
-PLOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../metrics_plots"))
+PLOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "metrics_plots"))
 os.makedirs(PLOT_DIR, exist_ok=True)
 
 CLIENTS = ["client0", "client1", "client2"]
