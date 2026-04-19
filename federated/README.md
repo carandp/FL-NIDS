@@ -7,6 +7,7 @@
 ## 1. Change Kernel (if needed)
 
 ```bash
+cd federated/
 source .venv/bin/activate
 ```
 
@@ -15,7 +16,6 @@ source .venv/bin/activate
 ## 2. Install dependencies and setup
 
 ```bash
-cd federated/
 uv sync && uv run python gen_config.py
 ```
 
