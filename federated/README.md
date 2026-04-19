@@ -88,7 +88,7 @@ shutdown all
 ## 6. Evaluate the model
 
 ```bash
-uv run python eval_federated.py \
+uv run python gen_eval_federated.py \
     --model jobs/<job_id>/workspace/app_server/FL_global_model.pt
 ```
 
@@ -98,4 +98,24 @@ The script derives an anomaly threshold from the validation set and reports:
 Test macro F1-score : 0.XXXX
 Test PR-AUC         : 0.XXXX
 Prediction time     : X.XXXX s
+```
+
+## 7. Extras
+
+To generate metrics_plots:
+
+```bash
+uv run python gen_metrics_graphs.py
+```
+
+To generate tsne_plots:
+
+```bash
+uv run python gen_tSNE_clients.py
+``` 
+
+or
+
+```bash
+uv run python gen_tSNE_server.py
 ```

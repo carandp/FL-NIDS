@@ -3,8 +3,8 @@ Evaluate a federated FL_global_model.pt checkpoint produced by NVFlare's
 PTFileModelPersistor.  Reuses the centralized test/validate utilities.
 
 Usage (from the federated/ directory):
-    uv run python eval_federated.py \
-        --model path/to/FL_global_model.pt
+    uv run python gen_eval_federated.py \
+        --model jobs/<job_id>/workspace/app_server/FL_global_model.pt
 """
 
 import argparse
@@ -173,6 +173,7 @@ def build_loaders(args):
 
 
 def main():
+
     parser = argparse.ArgumentParser(description="Evaluate a federated FL_global_model.pt")
     parser.add_argument(
         "--model", type=str, required=True,
@@ -198,75 +199,92 @@ def main():
     parser.add_argument("--threshold_method", type=str, default="supervised",
                         choices=["supervised", "unsupervised"],
                         help="How to derive the anomaly threshold from the validation set")
-    parser.add_argument("--save_curve", action="store_true",
-                        help="Save precision-recall curve as .npz")
     args = parser.parse_args()
     args.data_dir = DATASETS_DIR
     PROD_ROOT = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "poc_workspace", "fl_nids", "prod_00")
     )
 
-    # ------------------------------------------------------------------ #
-    # 1. Build data loaders
-    # ------------------------------------------------------------------ #
-    val_loader, test_loader, ndim_in, edim_in = build_loaders(args)
+    # Find next available report file name
+    reports_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "reports"))
+    os.makedirs(reports_dir, exist_ok=True)
+    n = 0
+    while True:
+        report_path = os.path.join(reports_dir, f"report_{n}.txt")
+        if not os.path.exists(report_path):
+            break
+        n += 1
 
-    # ------------------------------------------------------------------ #
-    # 2. Build model and load FL weights
-    # ------------------------------------------------------------------ #
-    pe = None if args.positional_encoding == "None" else args.positional_encoding
-    model = GraphIDS(
-        ndim_in=ndim_in,
-        edim_in=edim_in,
-        edim_out=args.edim_out,
-        embed_dim=args.ae_embedding_dim,
-        num_heads=args.num_heads,
-        num_layers=args.num_layers,
-        window_size=args.window_size,
-        dropout=args.dropout,
-        ae_dropout=args.ae_dropout,
-        positional_encoding=pe,
-        agg_type=args.agg_type,
-        mask_ratio=args.mask_ratio,
-    ).to(device)
+    class FileOnlyWriter:
+        def __init__(self, file):
+            self.file = file
+        def write(self, msg):
+            self.file.write(msg)
+        def flush(self):
+            self.file.flush()
 
-    model = load_fl_model(args.model, model)
+    with open(report_path, "w") as f:
+        # Redirect stdout to file only
+        old_stdout = sys.stdout
+        sys.stdout = FileOnlyWriter(f)
+        try:
+            # ------------------------------------------------------------------ #
+            # 1. Build data loaders
+            # ------------------------------------------------------------------ #
+            val_loader, test_loader, ndim_in, edim_in = build_loaders(args)
 
-    # ------------------------------------------------------------------ #
-    # 3. Derive threshold from validation set
-    # ------------------------------------------------------------------ #
-    print("Computing validation errors to derive threshold...")
-    _, val_errors, val_labels = validate(
-        model, val_loader, args.ae_batch_size, args.window_size, device
-    )
-    threshold = find_threshold(val_errors, val_labels, method=args.threshold_method)
-    print(f"Threshold ({args.threshold_method}): {threshold:.6f}")
+            # ------------------------------------------------------------------ #
+            # 2. Build model and load FL weights
+            # ------------------------------------------------------------------ #
+            pe = None if args.positional_encoding == "None" else args.positional_encoding
+            model = GraphIDS(
+                ndim_in=ndim_in,
+                edim_in=edim_in,
+                edim_out=args.edim_out,
+                embed_dim=args.ae_embedding_dim,
+                num_heads=args.num_heads,
+                num_layers=args.num_layers,
+                window_size=args.window_size,
+                dropout=args.dropout,
+                ae_dropout=args.ae_dropout,
+                positional_encoding=pe,
+                agg_type=args.agg_type,
+                mask_ratio=args.mask_ratio,
+            ).to(device)
 
-    # ------------------------------------------------------------------ #
-    # 4. Evaluate on test set
-    # ------------------------------------------------------------------ #
-    if torch.cuda.is_available():
-        torch.cuda.reset_peak_memory_stats()
+            model = load_fl_model(args.model, model)
 
-    print("Evaluating on test set...")
-    f1, pr_auc, errors, test_labels, pred_time = test(
-        model, test_loader, args.ae_batch_size, args.window_size, device,
-        threshold=threshold,
-    )
+            # ------------------------------------------------------------------ #
+            # 3. Derive threshold from validation set
+            # ------------------------------------------------------------------ #
+            print("Computing validation errors to derive threshold...")
+            _, val_errors, val_labels = validate(
+                model, val_loader, args.ae_batch_size, args.window_size, device
+            )
+            threshold = find_threshold(val_errors, val_labels, method=args.threshold_method)
+            print(f"Threshold ({args.threshold_method}): {threshold:.6f}")
 
-    print(f"\nTest macro F1-score : {f1:.4f}")
-    print(f"Test PR-AUC         : {pr_auc:.4f}")
-    print(f"Prediction time     : {pred_time:.4f} s")
+            # ------------------------------------------------------------------ #
+            # 4. Evaluate on test set
+            # ------------------------------------------------------------------ #
+            if torch.cuda.is_available():
+                torch.cuda.reset_peak_memory_stats()
 
-    if args.save_curve:
-        precision, recall, _ = precision_recall_curve(test_labels.cpu(), errors.cpu())
-        out_dir = os.path.join(os.path.dirname(__file__), "curves")
-        os.makedirs(out_dir, exist_ok=True)
-        curve_path = os.path.join(out_dir, f"precision_recall_{args.dataset}_federated.npz")
-        np.savez(curve_path, precision=precision, recall=recall)
-        print(f"PR curve saved to   : {curve_path}")
+            print("Evaluating on test set...")
+            f1, pr_auc, errors, test_labels, pred_time = test(
+                model, test_loader, args.ae_batch_size, args.window_size, device,
+                threshold=threshold,
+            )
 
-    print_all_metrics(PROD_ROOT)
+            print(f"\nTest macro F1-score : {f1:.4f}")
+            print(f"Test PR-AUC         : {pr_auc:.4f}")
+            print(f"Prediction time     : {pred_time:.4f} s")
+
+            print_all_metrics(PROD_ROOT)
+        finally:
+            sys.stdout = old_stdout
+
+    print(f"Report saved to: {report_path}")
 
 if __name__ == "__main__":
     main()
