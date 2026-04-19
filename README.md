@@ -7,6 +7,10 @@ This repository evaluates the trade-offs between privacy, performance, and compu
 
 The project is organized into three main phases, each corresponding to a specific implementation milestone.
 
+### 1.0 data_analysis/
+
+This forder contains some light data analysis of the NF-CSE-CIC-IDS2018-v3 dataset.
+
 ### 1.1 centralized/
 
 This folder contains the Centralized Benchmark.
@@ -38,9 +42,17 @@ This folder contains the Hardened Federated Model.
 
 - Linux / [WSL2](https://documentation.ubuntu.com/wsl/stable/howto/install-ubuntu-wsl2/)
 - [uv](https://docs.astral.sh/uv/) (for project management)
-- NetFlow V3 Dataset. You will need to download the University of Queensland feature-integrated [NF-CSE-CIC-IDS2018-v3](https://staff.itee.uq.edu.au/marius/NIDS_datasets/) dataset.
+- NetFlow V3 Dataset. You will need to download the University of Queensland feature-integrated NF-CSE-CIC-IDS2018-v3 dataset.
 
-### 2.2 Hardware
+### 2.2 Downloading dataset
+
+Download the NF-CSE-CIC-IDS2018-v3 dataset from the [original source](https://staff.itee.uq.edu.au/marius/NIDS_datasets/). Once downloaded, extract and place the CSV file into the following directory:
+
+```bash
+datasets/NF-CSE-CIC-IDS2018-v3/NF-CSE-CIC-IDS2018-v3.csv
+```
+
+### 2.3 Hardware
 
 The hardware used for training and testing the models is the following.
 
@@ -50,10 +62,17 @@ The hardware used for training and testing the models is the following.
 | GPU | NVIDIA RTX 4090 (24GB) |
 | Memory | DDR4 RAM (32GB) |
 
-### 2.3 Next Step: WIP 🚧 
+### 2.4 Running each phase
+
+Navigate to the relevant subfolder and follow the instructions in its local README.md to execute that phase of the project.
+
+To update venv run inside phase folder:
+```bash
+source .venv/bin/activate
+```
 
 ---
 
-## 9. License
+## 3. License
 
 All original components of this repository are licensed under the [Apache License 2.0](https://github.com/carandp/FL-NIDS/blob/main/LICENSE). Third-party components are used in compliance with their respective licenses.

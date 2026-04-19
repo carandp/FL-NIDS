@@ -1,27 +1,33 @@
 # Federated Learning — Quick Start Guide
 
-> Prerequisites: `uv` installed and the dataset available at `datasets/NF-CSE-CIC-IDS2018-v3/`. See the root README for setup details.
+> **Prerequisites:** `uv` installed and the dataset available at `datasets/NF-CSE-CIC-IDS2018-v3/`. See the root README for setup details.
 
 ---
 
-## 1. Install dependencies and setup
+## 1. Change Kernel (if needed)
 
 ```bash
 cd federated/
+source .venv/bin/activate
+```
+
+---
+
+## 2. Install dependencies and setup
+
+```bash
 uv sync && uv run python gen_config.py
 ```
 
 ---
 
-## 2. Set up and start the POC environment
+## 3. Set up and start the POC environment
 
 The first time (or after deleting `poc_workspace/`):
 
 ```bash
 uv run nvflare poc prepare -i ./project.yml -d .
 ```
-
-> By default the project.yml that builds the PoC has 2 clients, the job meta.json too.
 
 Link job directory
 
@@ -39,7 +45,7 @@ You will see a `>` prompt — this is the NVFlare admin console.
 
 ---
 
-## 3. Submit the job
+## 4. Submit the job
 
 At the `>` prompt:
 
@@ -57,7 +63,7 @@ Training progress is printed to the same terminal. Each round logs the local epo
 
 ---
 
-## 4. Download the trained model
+## 5. Download the trained model
 
 Once all rounds complete (you will see `FINISHED:COMPLETED` in the logs), download the job output at the `>` prompt:
 
@@ -71,22 +77,19 @@ This extracts the workspace to:
 jobs/<job_id>/workspace/app_server/FL_global_model.pt
 ```
 
-Type `bye` to exit the admin console.
-
 Stop the POC environment:
 
 ```bash
-uv run nvflare poc stop
+shutdown all
 ```
 
 ---
 
-## 5. Evaluate the model
+## 6. Evaluate the model
 
 ```bash
-uv run python eval_federated.py \
-    --model jobs/<job_id>/workspace/app_server/FL_global_model.pt \
-    --dataset NF-CSE-CIC-IDS2018-v3
+uv run python gen_eval_federated.py \
+    --model jobs/<job_id>/workspace/app_server/FL_global_model.pt
 ```
 
 The script derives an anomaly threshold from the validation set and reports:
@@ -95,13 +98,25 @@ The script derives an anomaly threshold from the validation set and reports:
 Test macro F1-score : 0.XXXX
 Test PR-AUC         : 0.XXXX
 Prediction time     : X.XXXX s
-Peak GPU memory     : XXX.XX MB
 ```
 
-### Optional flags
+## 7. Extras
 
-| Flag | Description |
-|---|---|
-| `--threshold_method unsupervised` | Use MAD-based threshold instead of best-F1 search |
-| `--save_curve` | Save precision-recall curve to `curves/` as `.npz` |
-| `--fraction 0.2` | Default — reuses the cached processed dataset from training |
+To generate metrics_plots:
+
+```bash
+uv run python gen_metrics_graphs.py
+```
+
+To generate tsne_plots:
+
+```bash
+uv run python gen_tSNE_clients.py
+``` 
+
+or
+
+```bash
+uv run python gen_tSNE_server.py \
+        --job <job_id>
+```

@@ -26,7 +26,7 @@ class NIDSTrainer(Executor):
     def __init__(
         self,
         data_dir: str,
-        dataset_name: str,
+        dataset_name: str = "NF-CSE-CIC-IDS2018-v3",
         local_epochs: int = 2,
         batch_size: int = 16384,
         ae_batch_size: int = 64,
@@ -45,7 +45,7 @@ class NIDSTrainer(Executor):
         agg_type: str = "mean",
         mask_ratio: float = 0.15,
         positional_encoding=None,
-        fraction: float = 0.2,
+        client_id: str = None,
         checkpoint_dir: str = "checkpoints",
     ):
         super().__init__()
@@ -69,7 +69,7 @@ class NIDSTrainer(Executor):
         self.agg_type = agg_type
         self.mask_ratio = mask_ratio
         self.positional_encoding = positional_encoding
-        self.fraction = fraction
+        self.client_id = client_id
         self.checkpoint_dir = checkpoint_dir
 
         # Initialized lazily on first round
@@ -110,7 +110,7 @@ class NIDSTrainer(Executor):
             dataset_name=self.dataset_name,
             batch_size=self.batch_size,
             fanout=self.fanout,
-            fraction=self.fraction,
+            client_id=self.client_id,
             shuffle=(self.positional_encoding is None),
         )
 
@@ -164,7 +164,10 @@ class NIDSTrainer(Executor):
         _, val_errors, val_labels = validate(
             self.model, self.val_loader, self.ae_batch_size, self.window_size, device
         )
-        val_pr_auc = average_precision_score(val_labels.cpu(), val_errors.cpu())
+        # Macro PR-AUC for binary classification: average of positive and negative class PR-AUCs
+        pr_auc_pos = average_precision_score(val_labels.cpu(), val_errors.cpu())
+        pr_auc_neg = average_precision_score(1 - val_labels.cpu(), 1 - val_errors.cpu())
+        val_pr_auc = (pr_auc_pos + pr_auc_neg) / 2
         threshold = find_threshold(val_errors, val_labels, method="supervised")
         val_pred = (val_errors > threshold).int()
         val_f1 = f1_score(val_labels.cpu(), val_pred.cpu(), average="macro", zero_division=0)
@@ -172,7 +175,7 @@ class NIDSTrainer(Executor):
         self.log_info(
             fl_ctx,
             f"Round {current_round} — global model: val_pr_auc={val_pr_auc:.4f}, "
-            f"val_f1={val_f1:.4f}, threshold={threshold:.6f}",
+            f"val_macro_f1={val_f1:.4f}, threshold={threshold:.6f}",
         )
 
         if val_pr_auc >= self.best_val_pr_auc:
@@ -184,7 +187,7 @@ class NIDSTrainer(Executor):
                     "model_state_dict": self.model.state_dict(),
                     "round": current_round,
                     "val_pr_auc": val_pr_auc,
-                    "val_f1": val_f1,
+                    "val_macro_f1": val_f1,
                     "threshold": threshold,
                 },
                 ckpt_path,
@@ -213,7 +216,10 @@ class NIDSTrainer(Executor):
         val_loss_local, val_errors_local, val_labels_local = validate(
             self.model, self.val_loader, self.ae_batch_size, self.window_size, device
         )
-        val_pr_auc_local = average_precision_score(val_labels_local.cpu(), val_errors_local.cpu())
+        # Macro PR-AUC for binary classification: average of positive and negative class PR-AUCs
+        pr_auc_pos_local = average_precision_score(val_labels_local.cpu(), val_errors_local.cpu())
+        pr_auc_neg_local = average_precision_score(1 - val_labels_local.cpu(), 1 - val_errors_local.cpu())
+        val_pr_auc_local = (pr_auc_pos_local + pr_auc_neg_local) / 2
         threshold_local = find_threshold(val_errors_local, val_labels_local, method="supervised")
         val_pred_local = (val_errors_local > threshold_local).int()
         val_f1_local = f1_score(val_labels_local.cpu(), val_pred_local.cpu(), average="macro", zero_division=0)
@@ -223,7 +229,7 @@ class NIDSTrainer(Executor):
             fl_ctx,
             f"Round {current_round} complete — "
             f"train_loss={total_train_loss:.6f}, val_loss={val_loss_local:.6f}, "
-            f"val_pr_auc={val_pr_auc_local:.4f}, val_f1={val_f1_local:.4f}",
+            f"val_pr_auc={val_pr_auc_local:.4f}, val_macro_f1={val_f1_local:.4f}",
         )
         self.log_info(fl_ctx, separator)
 
@@ -233,7 +239,7 @@ class NIDSTrainer(Executor):
             "train_loss": total_train_loss,
             "val_loss": val_loss_local,
             "val_pr_auc": val_pr_auc_local,
-            "val_f1": val_f1_local,
+            "val_macro_f1": val_f1_local,
         })
         os.makedirs(self.checkpoint_dir, exist_ok=True)
         metrics_path = os.path.join(self.checkpoint_dir, f"metrics_history_{site_name}.json")

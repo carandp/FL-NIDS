@@ -1,8 +1,8 @@
 {
   "name": "nids_fedavg",
   "resource_spec": {},
+  "min_clients": 3,
   "deploy_map": {
-    "app": ["server", "site-1", "site-2"]
-  },
-  "min_clients": 1
+    "app": ["@ALL"]
+  }
 }

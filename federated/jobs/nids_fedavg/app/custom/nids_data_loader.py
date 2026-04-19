@@ -6,20 +6,22 @@ from utils.dataloaders import NetFlowDataset
 
 def get_loaders(
     data_dir: str,
-    dataset_name: str,
     batch_size: int,
     fanout: int,
-    fraction: float,
-    shuffle: bool,
+    dataset_name: str = "NF-CSE-CIC-IDS2018-v3",
+    fraction: float = None,
+    shuffle: bool = True,
     seed: int = 42,
+    client_id: str = None,
 ):
     dataset = NetFlowDataset(
         name=dataset_name,
         data_dir=data_dir,
         force_reload=False,
-        fraction=fraction,
+        fraction=fraction,  # Only used if client_id is None
         data_type="benign",
         seed=seed,
+        client_id=client_id,  # Use client_id from fed_clients
     )
 
     ndim_in = dataset.num_node_features
