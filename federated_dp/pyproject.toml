@@ -1,0 +1,35 @@
+[project]
+name = "federated_dp"
+version = "0.1.0"
+description = "Federated learning self-supervised GNN for Network Intrusion Detection (GraphIDS) implementation"
+readme = "README.md"
+requires-python = "==3.11.*"
+dependencies = [
+    "fastparquet>=2026.3.0",
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.2",
+    "nvflare>=2.7.1",
+    "pandas>=3.0.1",
+    "pyg-lib>=0.5.0",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.8.0",
+    "scipy>=1.17.1",
+    "torch==2.8.0",
+    "torch-geometric==2.7.0",
+    "torch-scatter>=2.1.2",
+    "torch-sparse>=0.6.18",
+    "torchaudio==2.8.0",
+    "torchvision==0.23.0",
+    "tqdm>=4.67.3",
+    "wandb>=0.25.0",
+]
+
+[tool.uv.sources]
+pyg_lib = [ { index = "pyg" } ]
+torch-scatter = [ { index = "pyg" } ]
+torch-sparse = [ { index = "pyg" } ]
+
+[[tool.uv.index]]
+name = "pyg"
+url = "https://data.pyg.org/whl/torch-2.8.0+cu128.html"
+format = "flat"
