@@ -1,45 +1,45 @@
 Node features: 49  |  Edge features: 49
-Loaded FL model from: jobs/af740277-707a-43bb-89ec-88e5a1383809/workspace/app_server/FL_global_model.pt
+Loaded FL model from: jobs/f926373a-3ef2-467f-9e23-219ddff00a2f/workspace/app_server/FL_global_model.pt
 Computing validation errors to derive threshold...
-Threshold (supervised): 0.001056
+Threshold (supervised): 0.000091
 Evaluating on test set...
 
-Test macro F1-score : 0.7981
-Test PR-AUC         : 0.5537
-Prediction time     : 2.0027 s
+Test macro F1-score : 0.8097
+Test PR-AUC         : 0.6894
+Prediction time     : 1.9083 s
 
 Run history (client0):
-    train_loss █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-      val_loss █▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-    val_pr_auc ▂▃▁▁▂▂▃▃▃▄▄▄▄▅▅▆▇▇██
-  val_macro_f1 ▃▃▁▁▂▃▄▄▅▅▅▅▆▆▇█▇███
+    train_loss █▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▁▁▁▂▂▂▂▃▃▃▄▄▄▄▄▅▅▅▆▆▆▇▇▇▇▇▇▇▇▇▇▇█████████████████
+  val_macro_f1 ▁▁▁▁▂▂▂▂▃▃▄▄▄▅▅▅▆▆▆▆▇▇▇▇▇▇▇▇▇▇█▇██████████████████
 
 Run summary:
-    train_loss 0.00186034
-      val_loss 0.000769471
-    val_pr_auc 0.825084
-  val_macro_f1 0.910204
+    train_loss 6.53119e-05
+      val_loss 7.21136e-05
+    val_pr_auc 0.899108
+  val_macro_f1 0.95168
 
 Run history (client1):
-    train_loss █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-      val_loss █▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-    val_pr_auc ▂▅▂▁▁▂▂▃▃▄▅▆▇▇███▇▇▇
-  val_macro_f1 ▁▄▅▅▅▅▅▅▅▅▆▆▆▆▆▆▆▆▇█
+    train_loss █▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▃▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▂▃▄▄▅▅▅▆▆▆▆▆▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇█▇█████
+  val_macro_f1 ▁▃▄▄▅▅▅▅▅▅▅▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▇▇█
 
 Run summary:
-    train_loss 0.00210744
-      val_loss 0.00100873
-    val_pr_auc 0.940685
-  val_macro_f1 0.950906
+    train_loss 5.97605e-05
+      val_loss 9.85852e-05
+    val_pr_auc 0.983308
+  val_macro_f1 0.969803
 
 Run history (client2):
-    train_loss █▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-      val_loss █▄▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-    val_pr_auc ▁▂▂▃▃▃▄▄▄▅▅▅▅▆▇▇████
-  val_macro_f1 ▁▁▁▁▂▃▃▃▃▄▄▅▅▆▆▇▇███
+    train_loss █▃▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▄▃▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▁▁▂▂▂▂▂▃▃▃▃▃▃▃▃▄▄▄▄▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇▇▇▇▇▇██████████
+  val_macro_f1 ▁▁▁▂▂▂▃▄▄▄▄▅▅▅▅▆▆▆▆▆▆▆▇▇▇▇█▇██████████████████████
 
 Run summary:
-    train_loss 0.0016528
-      val_loss 0.000481648
-    val_pr_auc 0.550701
-  val_macro_f1 0.606846
+    train_loss 4.77551e-05
+      val_loss 4.82234e-05
+    val_pr_auc 0.600415
+  val_macro_f1 0.665271
