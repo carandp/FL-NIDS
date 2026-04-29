@@ -47,6 +47,7 @@ class NIDSTrainer(Executor):
         positional_encoding=None,
         client_id: str = None,
         checkpoint_dir: str = "checkpoints",
+        early_stop_patience: int = 3,
     ):
         super().__init__()
         self.data_dir = data_dir
@@ -71,6 +72,7 @@ class NIDSTrainer(Executor):
         self.positional_encoding = positional_encoding
         self.client_id = client_id
         self.checkpoint_dir = checkpoint_dir
+        self.early_stop_patience = early_stop_patience
 
         # Initialized lazily on first round
         self.model = None
@@ -79,7 +81,10 @@ class NIDSTrainer(Executor):
         self.val_loader = None
 
         # Best-model tracking and per-round metrics across rounds
-        self.best_val_pr_auc = 0.0
+        self.best_global_val_pr_auc = 0.0
+        self.best_local_val_pr_auc = float("-inf")
+        self.rounds_no_improve = 0
+        self.early_stopped = False
         self.metrics_history: list = []
 
     # ------------------------------------------------------------------ #
@@ -139,6 +144,9 @@ class NIDSTrainer(Executor):
 
         self.log_info(fl_ctx, f"Model ready — edim_in={edim_in}, device={device}")
 
+    def _clone_state_dict(self):
+        return {k: v.detach().cpu().clone() for k, v in self.model.state_dict().items()}
+
     # ------------------------------------------------------------------ #
     # Training round                                                       #
     # ------------------------------------------------------------------ #
@@ -159,6 +167,7 @@ class NIDSTrainer(Executor):
         global_weights = {k: v.clone().cpu() for k, v in global_params.items()}
 
         current_round = dxo.get_meta_prop("current_round", 0)
+        site_name = fl_ctx.get_identity_name()
 
         # --- 2. Validate global model and save best checkpoint ---
         _, val_errors, val_labels = validate(
@@ -171,15 +180,14 @@ class NIDSTrainer(Executor):
         threshold = find_threshold(val_errors, val_labels, method="supervised")
         val_pred = (val_errors > threshold).int()
         val_f1 = f1_score(val_labels.cpu(), val_pred.cpu(), average="macro", zero_division=0)
-        site_name = fl_ctx.get_identity_name()
         self.log_info(
             fl_ctx,
             f"Round {current_round} — global model: val_pr_auc={val_pr_auc:.4f}, "
             f"val_macro_f1={val_f1:.4f}, threshold={threshold:.6f}",
         )
 
-        if val_pr_auc >= self.best_val_pr_auc:
-            self.best_val_pr_auc = val_pr_auc
+        if val_pr_auc >= self.best_global_val_pr_auc:
+            self.best_global_val_pr_auc = val_pr_auc
             os.makedirs(self.checkpoint_dir, exist_ok=True)
             ckpt_path = os.path.join(self.checkpoint_dir, f"best_global_model_{site_name}.pt")
             torch.save(
@@ -194,6 +202,23 @@ class NIDSTrainer(Executor):
             )
             self.log_info(fl_ctx, f"  New best model saved → {ckpt_path}")
 
+        if self.early_stopped:
+            self.log_info(
+                fl_ctx,
+                f"Round {current_round} — early-stopped; skipping local training and sending zero diff",
+            )
+            zero_diff = {k: torch.zeros_like(v).cpu().numpy() for k, v in global_weights.items()}
+            out_dxo = DXO(
+                data_kind=DataKind.WEIGHT_DIFF,
+                data=zero_diff,
+                meta={
+                    "num_steps_current_round": 0,
+                    "early_stopped": True,
+                    "rounds_no_improve": self.rounds_no_improve,
+                },
+            )
+            return out_dxo.to_shareable()
+
         # --- 3. Local training ---
         self.log_info(
             fl_ctx,
@@ -201,64 +226,133 @@ class NIDSTrainer(Executor):
         )
 
         total_train_loss = 0.0
+        best_round_state = None
+        best_round_epoch = None
+        best_round_metrics = None
+
         for epoch in range(self.local_epochs):
             if abort_signal.triggered:
                 return make_reply(ReturnCode.TASK_ABORTED)
             epoch_loss = self._run_epoch(abort_signal)
             total_train_loss += epoch_loss
+
+            val_loss_local, val_errors_local, val_labels_local = validate(
+                self.model, self.val_loader, self.ae_batch_size, self.window_size, device
+            )
+            # Macro PR-AUC for binary classification: average of positive and negative class PR-AUCs
+            pr_auc_pos_local = average_precision_score(val_labels_local.cpu(), val_errors_local.cpu())
+            pr_auc_neg_local = average_precision_score(1 - val_labels_local.cpu(), 1 - val_errors_local.cpu())
+            val_pr_auc_local = (pr_auc_pos_local + pr_auc_neg_local) / 2
+            threshold_local = find_threshold(val_errors_local, val_labels_local, method="supervised")
+            val_pred_local = (val_errors_local > threshold_local).int()
+            val_f1_local = f1_score(
+                val_labels_local.cpu(), val_pred_local.cpu(), average="macro", zero_division=0
+            )
+
             self.log_info(
                 fl_ctx,
-                f"  Epoch {epoch + 1}/{self.local_epochs} — loss: {epoch_loss:.6f}",
+                f"  Epoch {epoch + 1}/{self.local_epochs} — loss: {epoch_loss:.6f}, "
+                f"val_loss: {val_loss_local:.6f}, val_pr_auc: {val_pr_auc_local:.4f}, "
+                f"val_macro_f1: {val_f1_local:.4f}",
             )
+
+            if best_round_metrics is None or val_pr_auc_local > best_round_metrics["val_pr_auc"]:
+                best_round_state = self._clone_state_dict()
+                best_round_epoch = epoch + 1
+                best_round_metrics = {
+                    "val_loss": val_loss_local,
+                    "val_pr_auc": val_pr_auc_local,
+                    "val_macro_f1": val_f1_local,
+                    "threshold": threshold_local,
+                }
+
         total_train_loss /= max(self.local_epochs, 1)
 
-        # Validate locally-trained model and print round summary (mirrors centralized postfix)
-        val_loss_local, val_errors_local, val_labels_local = validate(
-            self.model, self.val_loader, self.ae_batch_size, self.window_size, device
-        )
-        # Macro PR-AUC for binary classification: average of positive and negative class PR-AUCs
-        pr_auc_pos_local = average_precision_score(val_labels_local.cpu(), val_errors_local.cpu())
-        pr_auc_neg_local = average_precision_score(1 - val_labels_local.cpu(), 1 - val_errors_local.cpu())
-        val_pr_auc_local = (pr_auc_pos_local + pr_auc_neg_local) / 2
-        threshold_local = find_threshold(val_errors_local, val_labels_local, method="supervised")
-        val_pred_local = (val_errors_local > threshold_local).int()
-        val_f1_local = f1_score(val_labels_local.cpu(), val_pred_local.cpu(), average="macro", zero_division=0)
+        if best_round_state is None:
+            best_round_state = self._clone_state_dict()
+            best_round_epoch = self.local_epochs
+            best_round_metrics = {
+                "val_loss": 0.0,
+                "val_pr_auc": float("-inf"),
+                "val_macro_f1": 0.0,
+                "threshold": 0.0,
+            }
+
         separator = "-" * 80
         self.log_info(fl_ctx, separator)
         self.log_info(
             fl_ctx,
             f"Round {current_round} complete — "
-            f"train_loss={total_train_loss:.6f}, val_loss={val_loss_local:.6f}, "
-            f"val_pr_auc={val_pr_auc_local:.4f}, val_macro_f1={val_f1_local:.4f}",
+            f"train_loss={total_train_loss:.6f}, val_loss={best_round_metrics['val_loss']:.6f}, "
+            f"val_pr_auc={best_round_metrics['val_pr_auc']:.4f}, "
+            f"val_macro_f1={best_round_metrics['val_macro_f1']:.4f}",
         )
         self.log_info(fl_ctx, separator)
 
+        os.makedirs(self.checkpoint_dir, exist_ok=True)
+        local_ckpt_path = os.path.join(
+            self.checkpoint_dir, f"best_local_model_{site_name}_round_{current_round}.pt"
+        )
+        torch.save(
+            {
+                "model_state_dict": best_round_state,
+                "round": current_round,
+                "epoch": best_round_epoch,
+                "val_pr_auc": best_round_metrics["val_pr_auc"],
+                "val_macro_f1": best_round_metrics["val_macro_f1"],
+                "val_loss": best_round_metrics["val_loss"],
+                "threshold": best_round_metrics["threshold"],
+            },
+            local_ckpt_path,
+        )
+
         # Persist per-round metrics for post-training reporting
-        self.metrics_history.append({
-            "round": current_round,
-            "train_loss": total_train_loss,
-            "val_loss": val_loss_local,
-            "val_pr_auc": val_pr_auc_local,
-            "val_macro_f1": val_f1_local,
-        })
+        self.metrics_history.append(
+            {
+                "round": current_round,
+                "train_loss": total_train_loss,
+                "val_loss": best_round_metrics["val_loss"],
+                "val_pr_auc": best_round_metrics["val_pr_auc"],
+                "val_macro_f1": best_round_metrics["val_macro_f1"],
+                "best_epoch": best_round_epoch,
+            }
+        )
         os.makedirs(self.checkpoint_dir, exist_ok=True)
         metrics_path = os.path.join(self.checkpoint_dir, f"metrics_history_{site_name}.json")
         with open(metrics_path, "w") as _f:
             json.dump(self.metrics_history, _f, indent=2)
 
+        if best_round_metrics["val_pr_auc"] > self.best_local_val_pr_auc:
+            self.best_local_val_pr_auc = best_round_metrics["val_pr_auc"]
+            self.rounds_no_improve = 0
+        else:
+            self.rounds_no_improve += 1
+            if self.rounds_no_improve >= self.early_stop_patience:
+                self.early_stopped = True
+                self.log_info(
+                    fl_ctx,
+                    f"Early stop triggered after {self.rounds_no_improve} rounds without improvement",
+                )
+
         # --- 4. Compute weight diff and convert to numpy for DXO ---
-        local_weights = self.model.state_dict()
-        weight_diff = {
-            k: (local_weights[k].cpu() - global_weights[k]).numpy()
-            for k in local_weights
-        }
+        if self.early_stopped:
+            weight_diff = {k: torch.zeros_like(v).cpu().numpy() for k, v in global_weights.items()}
+        else:
+            weight_diff = {
+                k: (best_round_state[k] - global_weights[k]).numpy()
+                for k in global_weights
+            }
 
         # --- 5. Return as DXO (stable across all NVFlare versions) ---
         num_samples = len(self.train_loader.dataset) if hasattr(self.train_loader, "dataset") else 1
         out_dxo = DXO(
             data_kind=DataKind.WEIGHT_DIFF,
             data=weight_diff,
-            meta={"num_steps_current_round": num_samples},
+            meta={
+                "num_steps_current_round": num_samples,
+                "early_stopped": self.early_stopped,
+                "rounds_no_improve": self.rounds_no_improve,
+            },
         )
         return out_dxo.to_shareable()
 

@@ -5,10 +5,11 @@
     "workflows": [
         {
             "id": "fedavg",
-            "path": "nvflare.app_common.workflows.fedavg.FedAvg",
+            "path": "early_stop_fedavg.EarlyStopFedAvg",
             "args": {
-                "num_rounds": 50,
-                "persistor_id": "persistor"
+                "num_rounds": 10,
+                "persistor_id": "persistor",
+                "early_stop_min_clients": 3
             }
         }
     ],
