@@ -127,14 +127,14 @@ def load_and_merge_client_graphs(split, client_dirs):
     merged = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, edge_labels=edge_labels, num_nodes=x.shape[0])
     return merged
 
+
+# Replacement: build_loaders for original centralized dataset
+
 def build_loaders(args):
-    fed_clients_root = os.path.abspath(os.path.join(args.data_dir, "fed_clients"))
-    client_dirs = [
-        os.path.join(fed_clients_root, f"client{i}", "pyg_graph_data", f"client_client{i}")
-        for i in range(3)
-    ]
-    val_graph = load_and_merge_client_graphs("val", client_dirs)
-    test_graph = load_and_merge_client_graphs("test", client_dirs)
+    # Path to the correct PyG graph data directory
+    orig_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "centralized", "datasets", "pyg_graph_data", "NF-CSE-CIC-IDS2018-v3_0_2"))
+    val_graph = torch.load(os.path.join(orig_data_dir, "val.pt"))[0]
+    test_graph = torch.load(os.path.join(orig_data_dir, "test.pt"))[0]
     ndim_in = val_graph.x.shape[1]
     edim_in = val_graph.edge_attr.shape[1]
     print(f"Node features: {ndim_in}  |  Edge features: {edim_in}")
