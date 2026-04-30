@@ -1,0 +1,50 @@
+-------------------------------------------------------------------------------------------------------------------------------
+| JOB ID                               | NAME        | STATUS             | SUBMIT TIME                      | RUN DURATION   |
+-------------------------------------------------------------------------------------------------------------------------------
+| 1d24c248-e1db-46fe-bbba-b1cf607fc5f0 | nids_fedavg | FINISHED:COMPLETED | 2026-04-29T20:29:02.739510-05:00 | 0:18:41.058820 |
+-------------------------------------------------------------------------------------------------------------------------------
+Node features: 49  |  Edge features: 49
+Loaded FL model from: jobs/1d24c248-e1db-46fe-bbba-b1cf607fc5f0/workspace/app_server/FL_global_model.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.012083
+Evaluating on test set...
+
+Test macro F1-score : 0.7233
+Test PR-AUC         : 0.2867
+Prediction time     : 0.2987 s
+
+Run history (client0):
+    train_loss █▄▃▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▅▄▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▅▇▇▇██████████▇▇▇▇▆▆▆▅▅▅
+  val_macro_f1 ▁▂▄▃▃▃▃▄▄▅▅▅▅▅▆▆▆▇▇▇▇▇▇██
+
+Run summary:
+    train_loss 0.00500439
+      val_loss 0.00344401
+    val_pr_auc 0.913181
+  val_macro_f1 0.919225
+
+Run history (client1):
+    train_loss █▄▂▂▂▁▁▁▁▁▁▁▁▁
+      val_loss █▃▂▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▂▆█▇▆▆▆▆▆▆▆▆▇
+  val_macro_f1 ▁▃▅█▆▅▅▅▅▅▅▅▅▆
+
+Run summary:
+    train_loss 0.0251689
+      val_loss 0.00440738
+    val_pr_auc 0.839964
+  val_macro_f1 0.936224
+
+Run history (client2):
+    train_loss █▄▃▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▁▁▂▂▃▄▄▅▅▆▆▇▇▇▇▇███████████████████
+  val_macro_f1 ▂▂▁▃▄▄▅▅▅▅▆▆▇▇▇█████████████████████
+
+Run summary:
+    train_loss 0.000189561
+      val_loss 0.000389503
+    val_pr_auc 0.577024
+  val_macro_f1 0.635822

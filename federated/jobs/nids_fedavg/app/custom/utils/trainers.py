@@ -25,8 +25,6 @@ def train_encoder(
     checkpoint,
     device="cuda",
 ):
-    best_pr_auc = 0.0
-    cnt_wait = 0
     criterion = nn.MSELoss(reduction="none")
     total_train_loss = 0
     for epoch in (pbar := tqdm(range(start_epoch + 1, num_epochs + 1), desc="Epochs")):
@@ -88,8 +86,8 @@ def train_encoder(
             model, test_loader, ae_batch_size, window_size, device, threshold
         )
 
-        # Keep saving the model if it produces the same or better validation PR-AUC
-        if val_pr_auc >= best_pr_auc:
+        # Only save the model at the last epoch
+        if epoch == num_epochs:
             model.save_checkpoint(
                 checkpoint,
                 optimizer=optimizer,
@@ -97,15 +95,6 @@ def train_encoder(
                 threshold=threshold,
             )
 
-        # Stop training if the validation PR-AUC does not improve for a number of epochs
-        if val_pr_auc > best_pr_auc:
-            best_pr_auc = val_pr_auc
-            cnt_wait = 0
-        else:
-            cnt_wait += 1
-            if cnt_wait >= patience:
-                print("Early stopping!")
-                break
         pbar.set_postfix(
             {
                 "train_loss": total_train_loss,
