@@ -8,7 +8,7 @@
         "args": {
           "data_dir": "/home/<username>/FL-NIDS/datasets/fed_clients/{SITE_NAME}",
           "local_epochs": 10,
-          "early_stop_patience": 3,
+          "early_stop_patience": 10,
           "batch_size": 16384,
           "ae_batch_size": 64,
           "window_size": 512,

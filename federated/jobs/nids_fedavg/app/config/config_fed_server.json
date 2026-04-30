@@ -7,7 +7,7 @@
             "id": "fedavg",
             "path": "early_stop_fedavg.EarlyStopFedAvg",
             "args": {
-                "num_rounds": 10,
+                "num_rounds": 30,
                 "persistor_id": "persistor",
                 "early_stop_min_clients": 3
             }
