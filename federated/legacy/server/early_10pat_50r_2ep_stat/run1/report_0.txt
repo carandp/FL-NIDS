@@ -1,0 +1,45 @@
+Node features: 49  |  Edge features: 49
+Loaded FL model from: jobs/9c91e50e-5eb1-47ff-83c6-f60e13d8e9c9/workspace/app_server/FL_global_model.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.010043
+Evaluating on test set...
+
+Test macro F1-score : 0.7217
+Test PR-AUC         : 0.3213
+Prediction time     : 0.2238 s
+
+Run history (client0):
+    train_loss █▄▂▂▂▂▁▁▁▁▁▁
+      val_loss █▄▃▂▂▂▁▁▁▁▁▁
+    val_pr_auc ▅█▆▃▂▁▁▂▃▄▅▆
+  val_macro_f1 ▆█▆▄▂▁▁▁▂▃▃▄
+
+Run summary:
+    train_loss 0.0216149
+      val_loss 0.00654115
+    val_pr_auc 0.877821
+  val_macro_f1 0.847019
+
+Run history (client1):
+    train_loss █▃▂▂▁▁▁▁▁▁▁▁
+      val_loss █▃▂▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁██▇▆▅▅▆▆▆▆▇
+  val_macro_f1 ▁██▇▇▇▇▇▇▇▇▇
+
+Run summary:
+    train_loss 0.0195129
+      val_loss 0.00441854
+    val_pr_auc 0.839797
+  val_macro_f1 0.934261
+
+Run history (client2):
+    train_loss █▄▃▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+      val_loss █▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+    val_pr_auc ▁▃▄▅▅▆▇▆▇▇▆▆▆▆▆▆▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇█▇██████████████
+  val_macro_f1 ▁▄▄▅▆▆▆▇▆▆▆▇▇▇▇▇▇███▇▇▇▇▇▇▇▇██████████████████████
+
+Run summary:
+    train_loss 3.14201e-05
+      val_loss 9.5285e-05
+    val_pr_auc 0.580382
+  val_macro_f1 0.637597

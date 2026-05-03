@@ -20,6 +20,21 @@ class EarlyStopFedAvg(FedAvg):
                 if client_name:
                     self._early_stopped_clients.add(client_name)
 
+    def _sample_active_clients(self, num_clients: int):
+        clients = [client.name for client in self.engine.get_clients()]
+        active_clients = [c for c in clients if c not in self._early_stopped_clients]
+
+        if not active_clients:
+            return []
+
+        if num_clients and num_clients != len(active_clients):
+            self.info(
+                f"Ignoring num_clients ({num_clients}); using all ({len(active_clients)}) active clients."
+            )
+
+        self.info(f"Sampled active clients: {active_clients}")
+        return active_clients
+
     def run(self) -> None:
         self.info(center_message("Start FedAvg (early-stop enabled)."))
 
@@ -32,7 +47,10 @@ class EarlyStopFedAvg(FedAvg):
 
             model.current_round = self.current_round
 
-            clients = self.sample_clients(self.num_clients)
+            clients = self._sample_active_clients(self.num_clients)
+            if not clients:
+                self.info("No active clients remaining; ending run.")
+                break
 
             results = self.send_model_and_wait(targets=clients, data=model)
             if not results:

@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from collections import deque
 import torch
 import torch.nn as nn
 from sklearn.metrics import average_precision_score, f1_score
@@ -86,6 +87,7 @@ class NIDSTrainer(Executor):
         self.rounds_no_improve = 0
         self.early_stopped = False
         self.metrics_history: list = []
+        self.recent_val_pr_auc = deque(maxlen=self.early_stop_patience)
 
     # ------------------------------------------------------------------ #
     # NVFlare entry point                                                  #
@@ -322,17 +324,24 @@ class NIDSTrainer(Executor):
         with open(metrics_path, "w") as _f:
             json.dump(self.metrics_history, _f, indent=2)
 
-        if best_round_metrics["val_pr_auc"] > self.best_local_val_pr_auc:
-            self.best_local_val_pr_auc = best_round_metrics["val_pr_auc"]
-            self.rounds_no_improve = 0
+        current_val_pr_auc = best_round_metrics["val_pr_auc"]
+        prev_window = list(self.recent_val_pr_auc)
+        self.recent_val_pr_auc.append(current_val_pr_auc)
+
+        if len(prev_window) == self.early_stop_patience:
+            if current_val_pr_auc <= max(prev_window):
+                self.rounds_no_improve += 1
+            else:
+                self.rounds_no_improve = 0
         else:
-            self.rounds_no_improve += 1
-            if self.rounds_no_improve >= self.early_stop_patience:
-                self.early_stopped = True
-                self.log_info(
-                    fl_ctx,
-                    f"Early stop triggered after {self.rounds_no_improve} rounds without improvement",
-                )
+            self.rounds_no_improve = 0
+
+        if self.rounds_no_improve >= self.early_stop_patience:
+            self.early_stopped = True
+            self.log_info(
+                fl_ctx,
+                f"Early stop triggered after {self.rounds_no_improve} rounds without improvement",
+            )
 
         # --- 4. Compute weight diff and convert to numpy for DXO ---
         if self.early_stopped:

@@ -1,7 +1,35 @@
 {
     "format_version": 2,
-    "task_data_filters": [],
-    "task_result_filters": [],
+    "task_data_filters": [
+        {
+            "tasks": [
+                "train"
+            ],
+            "filters": [
+                {
+                    "path": "comm_stats.CommStatsFilter",
+                    "args": {
+                        "direction": "out"
+                    }
+                }
+            ]
+        }
+    ],
+    "task_result_filters": [
+        {
+            "tasks": [
+                "train"
+            ],
+            "filters": [
+                {
+                    "path": "comm_stats.CommStatsFilter",
+                    "args": {
+                        "direction": "in"
+                    }
+                }
+            ]
+        }
+    ],
     "workflows": [
         {
             "id": "fedavg",
@@ -36,6 +64,11 @@
                     }
                 }
             }
+        },
+        {
+            "id": "comm_stats_reporter",
+            "path": "comm_stats.CommStatsReporter",
+            "args": {}
         }
     ]
 }
