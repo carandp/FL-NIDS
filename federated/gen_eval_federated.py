@@ -97,7 +97,6 @@ def load_fl_model(model_path: str, model: GraphIDS) -> GraphIDS:
     print(f"Loaded FL model from: {model_path}")
     return model
 
-
 def load_and_merge_client_graphs(split, client_dirs):
     datas = []
     for client_dir in client_dirs:
@@ -124,17 +123,41 @@ def load_and_merge_client_graphs(split, client_dirs):
     edge_attr = torch.cat(edge_attr_list, dim=0)
     edge_labels = torch.cat(edge_labels_list, dim=0)
     x = torch.cat(x_list, dim=0)
-    merged = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, edge_labels=edge_labels, num_nodes=x.shape[0])
+    merged = Data(
+        x=x,
+        edge_index=edge_index,
+        edge_attr=edge_attr,
+        edge_labels=edge_labels,
+        num_nodes=x.shape[0],
+    )
     return merged
 
 
-# Replacement: build_loaders for original centralized dataset
+def _normalize_client_name(client: str | None) -> str | None:
+    if client is None:
+        return None
+    client = client.strip()
+    if client.isdigit():
+        return f"client{client}"
+    return client
+
 
 def build_loaders(args):
-    # Path to the correct PyG graph data directory
-    orig_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "centralized", "datasets", "pyg_graph_data", "NF-CSE-CIC-IDS2018-v3_0_2"))
-    val_graph = torch.load(os.path.join(orig_data_dir, "val.pt"))[0]
-    test_graph = torch.load(os.path.join(orig_data_dir, "test.pt"))[0]
+    fed_clients_root = os.path.abspath(os.path.join(args.data_dir, "fed_clients"))
+    client_name = _normalize_client_name(args.client)
+    if client_name:
+        client_dirs = [
+            os.path.join(
+                fed_clients_root, client_name, "pyg_graph_data", f"client_{client_name}"
+            )
+        ]
+    else:
+        client_dirs = [
+            os.path.join(fed_clients_root, f"client{i}", "pyg_graph_data", f"client_client{i}")
+            for i in range(3)
+        ]
+    val_graph = load_and_merge_client_graphs("val", client_dirs)
+    test_graph = load_and_merge_client_graphs("test", client_dirs)
     ndim_in = val_graph.x.shape[1]
     edim_in = val_graph.edge_attr.shape[1]
     print(f"Node features: {ndim_in}  |  Edge features: {edim_in}")
@@ -196,6 +219,12 @@ def main():
     parser.add_argument("--mask_ratio", type=float, default=0.15)
     parser.add_argument("--positional_encoding", type=str, default="None",
                         choices=["None", "learnable", "sinusoidal"])
+    parser.add_argument(
+        "--client",
+        type=str,
+        default=None,
+        help="Evaluate a single client (client0/client1/client2 or 0/1/2).",
+    )
     parser.add_argument("--threshold_method", type=str, default="supervised",
                         choices=["supervised", "unsupervised"],
                         help="How to derive the anomaly threshold from the validation set")

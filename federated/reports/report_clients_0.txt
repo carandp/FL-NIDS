@@ -1,0 +1,69 @@
+
+=== client0 ===
+Node features: 49  |  Edge features: 49
+Loaded client model from: /home/carandp/FL-NIDS/federated/poc_workspace/fl_nids/prod_00/client0/checkpoints/best_global_model_client0.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.001691
+Evaluating on test set...
+
+Test macro F1-score : 0.9079
+Test PR-AUC         : 0.5918
+Prediction time     : 0.3721 s
+
+Run history (client0):
+    train_loss @-:......                                         
+      val_loss @-::..........                                    
+    val_pr_auc +*=:..  ....:::---===++***###%%%%%%%%%@@@@@@@@@@@@
+  val_macro_f1 ++=::.  .:::----==++***###%%%%%@@@@@@@@@@@@@@@@@@@
+
+Run summary:
+    train_loss 0.000711685
+      val_loss 0.000492947
+    val_pr_auc 0.9338
+  val_macro_f1 0.966872
+
+=== client1 ===
+Node features: 49  |  Edge features: 49
+Loaded client model from: /home/carandp/FL-NIDS/federated/poc_workspace/fl_nids/prod_00/client1/checkpoints/best_global_model_client1.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.002797
+Evaluating on test set...
+
+Test macro F1-score : 0.9924
+Test PR-AUC         : 0.9126
+Prediction time     : 0.6294 s
+
+Run history (client1):
+    train_loss @-:......                                         
+      val_loss @:........                                        
+    val_pr_auc  .:::-*#%%#%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  val_macro_f1  .===+#%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Run summary:
+    train_loss 0.00026864
+      val_loss 0.000193264
+    val_pr_auc 0.984156
+  val_macro_f1 0.996797
+
+=== client2 ===
+Node features: 49  |  Edge features: 49
+Loaded client model from: /home/carandp/FL-NIDS/federated/poc_workspace/fl_nids/prod_00/client2/checkpoints/best_global_model_client2.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.075477
+Evaluating on test set...
+
+Test macro F1-score : 0.6513
+Test PR-AUC         : 0.2670
+Prediction time     : 80.7236 s
+
+Run history (client2):
+    train_loss @-:......                                         
+      val_loss @####****+==-:::::..................              
+    val_pr_auc :-==*#%@@%*+--:::----:..:......::::........       
+  val_macro_f1 --==+**@@##++-:::-====---::--------::...          
+
+Run summary:
+    train_loss 0.00012934
+      val_loss 0.00146636
+    val_pr_auc 0.635296
+  val_macro_f1 0.704339

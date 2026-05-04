@@ -33,15 +33,18 @@
     "workflows": [
         {
             "id": "fedavg",
-            "path": "early_stop_fedavg.EarlyStopFedAvg",
+            "path": "nvflare.app_common.workflows.fedavg.FedAvg",
             "args": {
                 "num_rounds": 50,
-                "persistor_id": "persistor",
-                "early_stop_min_clients": 3
+                "persistor_id": "persistor"
             }
         }
     ],
     "components": [
+        {
+            "id": "comm_stats_reporter",
+            "path": "comm_stats.CommStatsReporter"
+        },
         {
             "id": "persistor",
             "path": "nvflare.app_opt.pt.file_model_persistor.PTFileModelPersistor",
@@ -64,11 +67,6 @@
                     }
                 }
             }
-        },
-        {
-            "id": "comm_stats_reporter",
-            "path": "comm_stats.CommStatsReporter",
-            "args": {}
         }
     ]
 }

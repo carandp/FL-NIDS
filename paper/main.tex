@@ -6,7 +6,8 @@
 \usepackage{hyperref}
 \usepackage{booktabs}
 
-\title{Impact of Secure Aggregation and Differential Privacy on Federated Network Intrusion Detection Systems}
+\title{Impact of Secure Aggregation and Differential Privacy on 
+Federated Network Intrusion Detection Systems}
 
 \author{
 \IEEEauthorblockN{Carlos Andrés Peña Arias}
@@ -22,123 +23,227 @@ Bogotá, Colombia\\
 \maketitle
 
 \begin{abstract}
-Federated Learning (FL) enables collaborative training of machine learning models without centralizing sensitive data, making it highly suitable for Network Intrusion Detection Systems (NIDS). However, FL is vulnerable to inference attacks that may compromise training data privacy \cite{ameria2023}. To mitigate these risks, privacy-preserving mechanisms such as Differential Privacy (DP) and Secure Aggregation (SA) are employed \cite{khraisat2024}. This work presents an empirical evaluation of the impact of DP and SA on the performance of a federated NIDS using industry-grade tooling. Results show that while SA preserves model accuracy with increased computational cost, DP introduces a measurable degradation in performance proportional to the noise level. A trade-off analysis between privacy, performance, and computational overhead is presented.
+    Federated Learning (FL) enables collaborative training of machine learning 
+    models without centralizing sensitive data, making it highly suitable for 
+    Network Intrusion Detection Systems (NIDS). However, FL is vulnerable to 
+    inference attacks that may compromise training data privacy and data exposure
+    attacks by honest-but-curious servers \cite{ameria2023}. To mitigate these 
+    risks, privacy-preserving mechanisms such as Differential Privacy (DP) and 
+    Secure Aggregation (SA) are employed \cite{khraisat2024}. This work presents 
+    an empirical evaluation of the impact of DP and SA on the performance of 
+    a federated NIDS using industry-level framework (NVIDIA FLARE).
+    \#TODO (verify:  
+    Results show that while SA preserves model accuracy with increased 
+    computational cost, DP introduces a measurable degradation in performance 
+    proportional to the noise level. A trade-off analysis between privacy, 
+    performance, and computational cost is presented.)
 \end{abstract}
 
 \begin{IEEEkeywords}
-Federated Learning, Network Intrusion Detection Systems, Differential Privacy, Secure Aggregation, NVFlare, Cybersecurity
+    Federated Learning, Network Intrusion Detection Systems, Differential Privacy, 
+    Secure Aggregation, NVFlare, Cybersecurity
 \end{IEEEkeywords}
 
 \section{Introduction}
 
-Modern Network Intrusion Detection Systems (NIDS) increasingly rely on machine learning techniques that require large-scale network traffic data \cite{khraisat2024}. Traditional centralized approaches introduce privacy risks and regulatory challenges due to data aggregation and storage of sensitive information.
+Modern NIDS rely more and more on machine learning (ML) and deep learning (DL), 
+which require access to large datasets to efficiently and accurately identify 
+cyber threats \cite{khraisat2024}. Traditional centralized approaches introduce 
+privacy risks and regulatory challenges due to data concentration and storage 
+of sensitive information.
 
-Federated Learning (FL) addresses this issue by enabling distributed model training without sharing raw data \cite{yurdem2024}. However, FL remains vulnerable to inference attacks, including membership inference, which can expose whether specific samples were used during training \cite{ameria2023}.
+FL addresses these issues by enabling distributed model training without sharing 
+raw data \cite{yurdem2024}. However, FL remains vulnerable to inference 
+attacks, including membership inference, which can expose whether specific 
+samples were used during training \cite{ameria2023}. Additionally, FL is vulnerable
+to data exposure attacks and datta poisoning attacks by honest-but-curious servers 
+\cite{he2025}.
 
-To mitigate these risks, additional privacy-preserving mechanisms such as Differential Privacy (DP) and Secure Aggregation (SA) are integrated into FL pipelines \cite{khraisat2024}. DP protects individual data points by injecting controlled noise, while SA ensures that the server only observes aggregated model updates.
+To mitigate these risks, additional privacy-preserving mechanisms such as 
+DP and SA are integrated into FL pipelines \cite{khraisat2024}. DP protects 
+individual data points by injecting controlled noise, while SA ensures 
+that the server only observes aggregated model updates.
 
-This paper evaluates the impact of these mechanisms on model performance and computational cost in a realistic federated NIDS setting using industry-standard tools.
+This paper evaluates the impact of these mechanisms on model performance 
+and computational cost in a realistic federated NIDS setting using 
+industry-standard framework (NVIDIA FLARE).
 
 \section{Related Work}
 
-Federated Learning has gained significant attention across domains such as cybersecurity, healthcare, and finance due to its privacy-preserving capabilities \cite{yurdem2024}. In the context of NIDS, FL enables collaborative model training across distributed environments without exposing raw network traffic data.
+Federated Learning has gained significant attention across domains such as 
+crytical infrastructure, healthcare, and finance due to its privacy-preserving 
+capabilities \cite{yurdem2024}. In the context of NIDS, FL enables 
+collaborative training across distributed environments without exposing 
+sensitive data.
 
-Despite these advantages, FL introduces several challenges, including vulnerability to inference attacks, communication overhead, and data heterogeneity \cite{khraisat2024}. In particular, inference attacks pose a major risk, as adversaries can extract sensitive information from model updates \cite{ameria2023}.
+Despite these advantages, FL introduces several challenges, including 
+vulnerability to inference attacks, communication overhead, and data 
+heterogeneity \cite{khraisat2024}. In particular, inference attacks pose 
+a major risk, as adversaries can extract sensitive information from model 
+updates \cite{ameria2023}.
 
-Differential Privacy has been widely adopted as a defense mechanism against such attacks, ensuring that individual data contributions cannot be easily inferred \cite{owasp2023}. However, the addition of noise typically degrades model performance.
+Differential Privacy has been widely adopted as a defense mechanism 
+against such attacks, ensuring that individual data contributions 
+cannot be easily inferred \cite{owasp2023}. However, the addition of 
+noise typically degrades model performance.
 
-Secure Aggregation, on the other hand, prevents the central server from accessing individual client updates by using cryptographic techniques such as homomorphic encryption \cite{khraisat2024}. While this method preserves accuracy, it introduces additional computational and communication overhead.
+Secure Aggregation, on the other hand, prevents the central server from 
+accessing individual client updates by using cryptographic techniques 
+such as homomorphic encryption \cite{khraisat2024}. While this method 
+preserves accuracy, it introduces additional computational and 
+communication overhead.
 
-Recent work has explored privacy-preserving FL for intrusion detection, but often lacks comprehensive experimental evaluation using large-scale datasets and industry frameworks \cite{torre2024}. Additionally, there is limited analysis of the quantitative trade-off between privacy and performance.
+Recent work has explored privacy-preserving FL for intrusion detection, 
+but often lacks comprehensive experimental evaluation using large-scale 
+datasets and industry frameworks \cite{torre2024}. Additionally, there 
+is limited analysis of the quantitative trade-off between privacy and 
+performance.
 
 \section{Methodology}
 
 \subsection{Dataset}
 
-Experiments were conducted using NetFlow-based datasets, which provide aggregated representations of network traffic suitable for large-scale intrusion detection \cite{luay2025}. These datasets include temporal features that enable the detection of complex attack patterns.
+Experiments were conducted using NetFlow-based datasets, which provide 
+aggregated representations of network traffic suitable for large-scale 
+intrusion detection \cite{luay2025}. These datasets include temporal 
+features that enable the detection of complex attack patterns.
 
 \subsection{Centralized Baseline}
 
-A centralized model was first implemented to establish baseline performance metrics, including:
+A centralized model was first implemented to establish baseline 
+performance metrics, including:
 
 \begin{itemize}
-\item Macro F1-score
-\item Precision-Recall AUC
+    \item Macro F1-score
+    \item Precision-Recall AUC
+\end{itemize}
+
+Computational cost was also measured with training time and data 
+transfered between clients and server.
+
+\begin{itemize}
+    \item Training time (seconds)
+    \item Data transfer volume (MB)
 \end{itemize}
 
 \subsection{Federated Learning Setup}
 
-The centralized model was adapted into a federated setting using NVIDIA FLARE, an industry-grade framework designed for scalable federated learning deployments \cite{roth2024}. The system consists of multiple clients simulating distributed network environments.
+The centralized model was adapted into a federated setting using 
+NVIDIA FLARE, an industry-grade framework designed for scalable 
+federated learning deployments \cite{roth2024}. The system consists 
+of multiple clients simulating distributed network environments.
+For each job configuration, the best global model is saved and evaluated
+after training. Additionally, the training metrics (F1 and PR-AUC) are 
+saved on each client for each round to later be plotted and analyzed.
+Lastly, the training time and data transfer are logged to evaluate
+the computational cost of the federated approach. \#TODO (describe pipeline,
+how is fedavg being done, how are the clients sending their updates to the server
+and how is the server aggregating them, etc.)
 
 \subsection{Secure Aggregation}
 
-Secure Aggregation was implemented using homomorphic encryption techniques to ensure that individual client updates remain private during aggregation \cite{khraisat2024}.
+Secure Aggregation was implemented using homomorphic encryption 
+techniques to ensure that individual client updates remain private 
+during aggregation \cite{khraisat2024}. For the implementation, 
+the CKKS scheme was used \cite{cheon2017}. CKKS was selected for 
+its efficiency in privacy-preserving ML. The following parameters were used:
+
+\begin{itemize}
+    \item \texttt{poly\_modulus\_degree}: 8192
+    \item \texttt{coeff\_mod\_bit\_sizes}: [60, 40, 40]
+\end{itemize}
+
+\#TODO (describe what and why of the parameters)
 
 \subsection{Differential Privacy}
 
-Differential Privacy was implemented by injecting Gaussian noise into model updates. The noise multiplier was varied to evaluate its impact on both privacy and performance, following standard DP practices \cite{owasp2023}.
+Differential Privacy was implemented by injecting Gaussian noise into 
+model updates. The noise multiplier was varied to evaluate its impact 
+on both privacy and performance, following standard DP practices 
+\cite{owasp2023}.
 
 \subsection{Evaluation Metrics}
 
 The following metrics were used:
 
 \begin{itemize}
-\item Macro F1-score
-\item PR-AUC
-\item Privacy budget ($\epsilon$)
-\item Computational overhead
+    \item Macro F1-score
+    \item PR-AUC
+    \item Privacy budget ($\epsilon$)
+    \item Computational overhead
 \end{itemize}
 
 \section{Results}
 
 \subsection{Centralized vs Federated}
 
-The federated model achieved performance comparable to the centralized baseline, with minor degradation due to non-IID data distribution across clients, a known challenge in FL systems \cite{khraisat2024}.
+The federated model achieved performance comparable to the centralized 
+baseline, with minor degradation due to non-IID data distribution across 
+clients, a known challenge in FL systems \cite{khraisat2024}.
 
 \subsection{Impact of Secure Aggregation}
 
-Secure Aggregation preserved model accuracy, as expected, since it does not alter the learning process itself. However, it introduced increased computational and communication costs due to cryptographic operations \cite{torre2024}.
+Secure Aggregation preserved model accuracy, as expected, since it 
+does not alter the learning process itself. However, it introduced 
+increased computational and communication costs due to cryptographic 
+operations \cite{torre2024}.
 
 \subsection{Impact of Differential Privacy}
 
-Differential Privacy introduced a clear trade-off between privacy and performance. Higher noise levels resulted in:
+Differential Privacy introduced a clear trade-off between privacy and 
+performance. Higher noise levels resulted in:
 
 \begin{itemize}
-\item Lower F1-score
-\item Reduced PR-AUC
-\item Improved privacy guarantees
+    \item Lower F1-score
+    \item Reduced PR-AUC
+    \item Improved privacy guarantees
 \end{itemize}
 
-These results are consistent with prior findings on DP in machine learning systems \cite{owasp2023}.
+These results are consistent with prior findings on DP in machine 
+learning systems \cite{owasp2023}.
 
 \subsection{Trade-off Analysis}
 
 A clear trade-off between privacy, performance, and cost was observed:
 
 \begin{itemize}
-\item SA: High computational cost, minimal accuracy loss
-\item DP: Lower computational overhead, significant accuracy degradation depending on noise level
+    \item SA: High computational cost, minimal accuracy loss
+    \item DP: Lower computational overhead, significant accuracy 
+    degradation depending on noise level
 \end{itemize}
 
 \section{Discussion}
 
-The results demonstrate that Secure Aggregation is suitable when maintaining model accuracy is critical, while Differential Privacy is necessary when strong privacy guarantees are required.
+The results demonstrate that Secure Aggregation is suitable when maintaining 
+model accuracy is critical, while Differential Privacy is necessary when 
+strong privacy guarantees are required.
 
-However, combining both mechanisms introduces additional system complexity and overhead. Prior work suggests that hybrid approaches can provide stronger privacy guarantees but require careful tuning \cite{torre2024}.
+However, combining both mechanisms introduces additional system complexity 
+and overhead. Prior work suggests that hybrid approaches can provide 
+stronger privacy guarantees but require careful tuning \cite{torre2024}.
 
-In practical deployments, selecting the appropriate mechanism depends on the application’s privacy requirements, regulatory constraints, and performance tolerance.
+In practical deployments, selecting the appropriate mechanism depends on 
+the application’s privacy requirements, regulatory constraints, and 
+performance tolerance.
 
 \section{Conclusion}
 
-This work provides an empirical evaluation of privacy-preserving mechanisms in federated NIDS using realistic datasets and an industry-standard framework.
+This work provides an empirical evaluation of privacy-preserving mechanisms 
+in federated NIDS using realistic datasets and an industry-standard framework.
 
-The findings highlight the inherent trade-offs between privacy, performance, and computational cost, offering practical insights for deploying federated learning systems in cybersecurity applications.
+The findings highlight the inherent trade-offs between privacy, performance, 
+and computational cost, offering practical insights for deploying federated 
+learning systems in cybersecurity applications.
 
-Future work includes combining Differential Privacy and Secure Aggregation in a unified framework and evaluating performance in real-world production environments.
+Future work includes combining Differential Privacy and Secure Aggregation 
+in a unified framework and evaluating performance in real-world production 
+environments.
 
 \section*{Acknowledgment}
 
-The authors thank the Universidad de los Andes for  all the academic support provided. To all teachers, especially Ph.D. Yuri Andrea Pinto as this thesis advisor.
+The authors thank the Universidad de los Andes for  all the academic 
+support provided. To all teachers, especially Ph.D. Yuri Andrea Pinto as 
+this thesis advisor.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

@@ -1,0 +1,43 @@
+(graphids) carandp@DESKTOP-2TD7K2T:~/FL-NIDS/centralized$ uv run main.py --data_dir datasets/ --config configs/NF-CSE-CIC-IDS2018-v3.yaml
+wandb: Tracking run with wandb version 0.23.0
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /home/carandp/FL-NIDS/centralized/wandb/offline-run-20260503_201834-3qbnfl5f
+Processing dataset NF-CSE-CIC-IDS2018-v3...
+Done!
+Number of features: 49
+Starting training...
+Epochs:  96%|▉| 96/100 [09:29<00:23,  5.84s/it, train_loss=0.000381, val_loss=0.000113, val_pr_auc=0.609, test_f1=0.933, test_Early stopping!
+Epochs:  96%|▉| 96/100 [09:34<00:23,  5.99s/it, train_loss=0.000381, val_loss=0.000113, val_pr_auc=0.609, test_f1=0.933, test_
+Evaluating on test set...
+Test macro F1-score: 0.9385
+Test PR-AUC: 0.6471
+Test prediction time: 0.1843 seconds
+Peak GPU memory usage: 1160.62 MB
+wandb: 
+wandb: Run history:
+wandb:        final_test_f1 ▁
+wandb:    final_test_pr_auc ▁
+wandb:   peak_gpu_memory_mb ▁
+wandb:              test_f1 ▁▁▃▃▄▅▅▆▆▆▆▆▆▆▆▆▇▇▇█████████████████████
+wandb:          test_pr_auc ▁▁▁▂▂▂▃▃▃▃▄▄▄▄▄▄▅▅▅▆▆▆▇▇▇███████████████
+wandb: test_prediction_time ▁
+wandb:       test_threshold ▁
+wandb:           train_loss █▇▆▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:             val_loss █▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           val_pr_auc ▁▁▁▂▂▃▃▃▄▄▄▄▄▄▄▄▄▄▄▅▆▆▆▆▇▇▇▇▇▇██████████
+wandb: 
+wandb: Run summary:
+wandb:        final_test_f1 0.93849
+wandb:    final_test_pr_auc 0.64705
+wandb:   peak_gpu_memory_mb 1160.62256
+wandb:              test_f1 0.93294
+wandb:          test_pr_auc 0.62165
+wandb: test_prediction_time 0.18426
+wandb:       test_threshold 0.00072
+wandb:           train_loss 0.00038
+wandb:             val_loss 0.00011
+wandb:           val_pr_auc 0.60865
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/carandp/FL-NIDS/centralized/wandb/offline-run-20260503_201834-3qbnfl5f
+wandb: Find logs at: ./wandb/offline-run-20260503_201834-3qbnfl5f/logs

@@ -4,19 +4,20 @@
 
 ---
 
-## 1. Change Kernel (if needed)
+## 1. Change kernel and install dependencies (if needed)
 
 ```bash
 cd federated/
+uv sync
 source .venv/bin/activate
 ```
 
 ---
 
-## 2. Install dependencies and setup
+## 2. Setup
 
 ```bash
-uv sync && uv run python gen_config.py
+uv run python gen_config.py
 ```
 
 ---
@@ -49,7 +50,7 @@ You will see a `>` prompt — this is the NVFlare admin console.
 
 At the `>` prompt:
 
-```
+```bash
 submit_job nids_fedavg
 ```
 
@@ -100,6 +101,12 @@ Test PR-AUC         : 0.XXXX
 Prediction time     : X.XXXX s
 ```
 
+```bash
+uv run python gen_eval_clients.py
+```
+
+Will evaluate the clients of the last runned job.
+
 ## 7. Extras
 
 To generate metrics_plots:
@@ -120,3 +127,17 @@ or
 uv run python gen_tSNE_server.py \
         --job <job_id>
 ```
+
+To generate diagnostics:
+
+```bash
+uv run python gen_diagnostics_plots.py
+```
+
+```bash
+uv run python gen_diagnostic_plot_global.py \
+    --job <job_id> \
+    --hist_min 0.0 \
+    --hist_max 0.002
+```
+

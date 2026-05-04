@@ -32,7 +32,7 @@ def run_tsne(Z, seed=42):
 		n_components=2,
 		init="pca",
 		learning_rate="auto",
-		perplexity=30,
+		perplexity=40,
 		random_state=seed
 	).fit_transform(Z)
 
@@ -84,7 +84,7 @@ def main():
 		edim_in=num_edge_features,
 		edim_out=64,  # from config
 		embed_dim=32,  # ae_embedding_dim from config
-		num_heads=1,  # adjust if needed
+		num_heads=4,  # adjust if needed
 		num_layers=1,
 		window_size=512,
 		dropout=0.5,
@@ -127,26 +127,29 @@ def main():
 	H_edge = torch.cat(edge_embs, dim=0).numpy()
 	H_rec = torch.cat(recon_embs, dim=0).numpy()
 
-	# 4) t-SNE
-	Z_edge = run_tsne(H_edge)
-	Z_rec = run_tsne(H_rec)
-
-	# 5) Plot
+	# 4) Downsample + balance BEFORE t-SNE
 	label_map = {0: "Benign", 1: "Attack"}
 	y_names = np.array([label_map.get(int(v), str(v)) for v in y_attack])
 
 	# Downsample + Balance
-	max_per_class = 4000
+	max_per_class = 20000
 	indices = []
+	rng = np.random.default_rng(42)
 	for cls in np.unique(y_names):
 		cls_idx = np.where(y_names == cls)[0]
 		if len(cls_idx) > max_per_class:
-			cls_idx = np.random.choice(cls_idx, max_per_class, replace=False)
+			cls_idx = rng.choice(cls_idx, max_per_class, replace=False)
 		indices.extend(cls_idx)
 	indices = np.array(indices)
-	Z_edge = Z_edge[indices]
-	Z_rec = Z_rec[indices]
+	H_edge = H_edge[indices]
+	H_rec = H_rec[indices]
 	y_names = y_names[indices]
+
+	# 5) t-SNE
+	Z_edge = run_tsne(H_edge)
+	Z_rec = run_tsne(H_rec)
+
+	# 6) Plot
 
 	fig, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=120)
 	plots = [
@@ -158,6 +161,7 @@ def main():
 	for ax, Z, title in plots:
 		benign_idx = y_names == "Benign"
 		attack_idx = y_names == "Attack"
+		attack_count = int(np.sum(attack_idx))
 		hb = ax.hexbin(
 			Z[benign_idx, 0],
 			Z[benign_idx, 1],
@@ -166,13 +170,14 @@ def main():
 			mincnt=1,
 			alpha=0.65
 		)
+		fig.colorbar(hb, ax=ax, label="Benign count")
 		ax.scatter(
 			Z[attack_idx, 0],
 			Z[attack_idx, 1],
 			s=14,
 			color="#ed8936",
 			alpha=0.9,
-			label="Attack"
+			label=f"Attack (n={attack_count})"
 		)
 		try:
 			if np.sum(benign_idx) > 50:
@@ -192,7 +197,7 @@ def main():
 		ax.grid(True, linestyle="--", alpha=0.25)
 		legend_elements = [
 			Patch(facecolor="#2b6cb0", edgecolor="none", alpha=0.65, label="Benign"),
-			Line2D([0], [0], marker='o', color='w', label='Attack',
+			Line2D([0], [0], marker='o', color='w', label=f"Attack (n={attack_count})",
 				markerfacecolor="#ed8936", markersize=8)
 		]
 		ax.legend(handles=legend_elements, title="Class", loc="upper center")

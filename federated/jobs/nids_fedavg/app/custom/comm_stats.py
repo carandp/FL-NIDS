@@ -28,7 +28,10 @@ class _CommStats:
 
     def format_summary(self) -> str:
         header = "Data transfer summary (server perspective)"
-        lines = ["=" * len(header), header, "=" * len(header)]
+        lines = [" "]
+        lines.append("=" * len(header))
+        lines.append(header)
+        lines.append("=" * len(header))
         lines.append(f"Total sent to clients : {_format_bytes(self.bytes_out_total)}")
         lines.append(f"Total received        : {_format_bytes(self.bytes_in_total)}")
         lines.append(f"Grand total           : {_format_bytes(self.bytes_out_total + self.bytes_in_total)}")
@@ -108,5 +111,5 @@ class CommStatsFilter(Filter):
 
 class CommStatsReporter(FLComponent):
     def handle_event(self, event_type: str, fl_ctx: FLContext):
-        if event_type in {EventType.END_RUN, EventType.JOB_COMPLETED, EventType.ABOUT_TO_END_RUN}:
+        if event_type in {EventType.END_RUN, EventType.JOB_COMPLETED}:
             self.log_info(fl_ctx, _STATS.format_summary())
