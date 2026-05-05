@@ -32,7 +32,7 @@ def run_tsne(Z, seed=42):
 		n_components=2,
 		init="pca",
 		learning_rate="auto",
-		perplexity=40,
+		perplexity=35,
 		random_state=seed
 	).fit_transform(Z)
 

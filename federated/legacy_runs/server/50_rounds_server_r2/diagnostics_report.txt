@@ -2,32 +2,31 @@
 Loaded model from: /home/carandp/FL-NIDS/federated/poc_workspace/fl_nids/prod_00/client0/checkpoints/best_global_model_client0.pt
 No threshold provided, using mean of errors for prediction.
 Positive rate: 0.289006
-AP (errors)  : 0.506511
-AP (-errors) : 0.184398
+AP (errors)  : 0.407881
+AP (-errors) : 0.200821
 Saved: /home/carandp/FL-NIDS/federated/diagnostics_plots/diagnostics_client0.png
 
 === client1 ===
 Loaded model from: /home/carandp/FL-NIDS/federated/poc_workspace/fl_nids/prod_00/client1/checkpoints/best_global_model_client1.pt
 No threshold provided, using mean of errors for prediction.
 Positive rate: 0.125443
-AP (errors)  : 0.933780
-AP (-errors) : 0.065899
+AP (errors)  : 0.947777
+AP (-errors) : 0.065861
 Saved: /home/carandp/FL-NIDS/federated/diagnostics_plots/diagnostics_client1.png
 
 === client2 ===
 Loaded model from: /home/carandp/FL-NIDS/federated/poc_workspace/fl_nids/prod_00/client2/checkpoints/best_global_model_client2.pt
 No threshold provided, using mean of errors for prediction.
 Positive rate: 0.055771
-AP (errors)  : 0.551050
-AP (-errors) : 0.028928
+AP (errors)  : 0.533715
+AP (-errors) : 0.028976
 Saved: /home/carandp/FL-NIDS/federated/diagnostics_plots/diagnostics_client2.png
 
-
-=== global ===
+(federated) carandp@DESKTOP-2TD7K2T:~/FL-NIDS/federated$ uv run python gen_diagnostic_plot_global.py     --job 9d359d98-19b8-4cfb-8be7-b269d0455f94     --hist_min 0.0     --hist_max 0.002
 Clients: client0, client1, client2
-Loaded model from: /home/carandp/FL-NIDS/federated/jobs/698fe2d0-3ea3-48e0-b7ae-7dccc4eb6cef/workspace/app_server/FL_global_model.pt
+Loaded model from: /home/carandp/FL-NIDS/federated/jobs/9d359d98-19b8-4cfb-8be7-b269d0455f94/workspace/app_server/FL_global_model.pt
 No threshold provided, using mean of errors for prediction.
 Positive rate: 0.148816
-AP(errors): 0.554295
-AP(-errors): 0.082432
-Saved: /home/carandp/FL-NIDS/federated/diagnostics_plots/diagnostics_global_698fe2d0-3ea3-48e0-b7ae-7dccc4eb6cef.png
+AP(errors): 0.455587
+AP(-errors): 0.085167
+Saved: /home/carandp/FL-NIDS/federated/diagnostics_plots/diagnostics_global_9d359d98-19b8-4cfb-8be7-b269d0455f94.png

@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{booktabs}
+\usepackage{multirow}
 
 \title{Impact of Secure Aggregation and Differential Privacy on 
 Federated Network Intrusion Detection Systems}
@@ -23,94 +24,188 @@ Bogotá, Colombia\\
 \maketitle
 
 \begin{abstract}
-    Federated Learning (FL) enables collaborative training of machine learning 
-    models without centralizing sensitive data, making it highly suitable for 
-    Network Intrusion Detection Systems (NIDS). However, FL is vulnerable to 
+    Federated Learning (FL) enables collaborative training of machine learning
+    models without centralizing sensitive data, making it highly suitable for
+    Network Intrusion Detection Systems (NIDS). However, FL is vulnerable to
     inference attacks that may compromise training data privacy and data exposure
-    attacks by honest-but-curious servers \cite{ameria2023}. To mitigate these 
-    risks, privacy-preserving mechanisms such as Differential Privacy (DP) and 
-    Secure Aggregation (SA) are employed \cite{khraisat2024}. This work presents 
-    an empirical evaluation of the impact of DP and SA on the performance of 
+    attacks by honest-but-curious servers \cite{ameria2023}. To mitigate these
+    risks, privacy-preserving mechanisms such as Differential Privacy (DP) and
+    Secure Aggregation (SA) are employed \cite{khraisat2024}. This work presents
+    an empirical evaluation of the impact of DP and SA on the performance of
     a federated NIDS using industry-level framework (NVIDIA FLARE).
-    \#TODO (verify:  
-    Results show that while SA preserves model accuracy with increased 
-    computational cost, DP introduces a measurable degradation in performance 
-    proportional to the noise level. A trade-off analysis between privacy, 
+    \#TODO (verify:
+    Results show that while SA preserves model accuracy with increased
+    computational cost, DP introduces a measurable degradation in performance
+    proportional to the noise level. A trade-off analysis between privacy,
     performance, and computational cost is presented.)
 \end{abstract}
 
 \begin{IEEEkeywords}
-    Federated Learning, Network Intrusion Detection Systems, Differential Privacy, 
+    Federated Learning, Network Intrusion Detection Systems, Differential Privacy,
     Secure Aggregation, NVFlare, Cybersecurity
 \end{IEEEkeywords}
 
 \section{Introduction}
 
-Modern NIDS rely more and more on machine learning (ML) and deep learning (DL), 
-which require access to large datasets to efficiently and accurately identify 
-cyber threats \cite{khraisat2024}. Traditional centralized approaches introduce 
-privacy risks and regulatory challenges due to data concentration and storage 
+Modern NIDS rely more and more on machine learning (ML) and deep learning (DL),
+which require access to large datasets to efficiently and accurately identify
+cyber threats \cite{khraisat2024}. Traditional centralized approaches introduce
+privacy risks and regulatory challenges due to data concentration and storage
 of sensitive information.
 
-FL addresses these issues by enabling distributed model training without sharing 
-raw data \cite{yurdem2024}. However, FL remains vulnerable to inference 
-attacks, including membership inference, which can expose whether specific 
+FL addresses these issues by enabling distributed model training without sharing
+raw data \cite{yurdem2024}. However, FL remains vulnerable to inference
+attacks, including membership inference, which can expose whether specific
 samples were used during training \cite{ameria2023}. Additionally, FL is vulnerable
-to data exposure attacks and datta poisoning attacks by honest-but-curious servers 
+to data exposure attacks and datta poisoning attacks by honest-but-curious servers
 \cite{he2025}.
 
-To mitigate these risks, additional privacy-preserving mechanisms such as 
-DP and SA are integrated into FL pipelines \cite{khraisat2024}. DP protects 
-individual data points by injecting controlled noise, while SA ensures 
+To mitigate these risks, additional privacy-preserving mechanisms such as
+DP and SA are integrated into FL pipelines \cite{khraisat2024}. DP protects
+individual data points by injecting controlled noise, while SA ensures
 that the server only observes aggregated model updates.
 
-This paper evaluates the impact of these mechanisms on model performance 
-and computational cost in a realistic federated NIDS setting using 
+This paper evaluates the impact of these mechanisms on model performance
+and computational cost in a realistic federated NIDS setting using
 industry-standard framework (NVIDIA FLARE).
 
 \section{Related Work}
 
-Federated Learning has gained significant attention across domains such as 
-crytical infrastructure, healthcare, and finance due to its privacy-preserving 
-capabilities \cite{yurdem2024}. In the context of NIDS, FL enables 
-collaborative training across distributed environments without exposing 
+Federated Learning has gained significant attention across domains such as
+crytical infrastructure, healthcare, and finance due to its privacy-preserving
+capabilities \cite{yurdem2024}. In the context of NIDS, FL enables
+collaborative training across distributed environments without exposing
 sensitive data.
 
-Despite these advantages, FL introduces several challenges, including 
-vulnerability to inference attacks, communication overhead, and data 
-heterogeneity \cite{khraisat2024}. In particular, inference attacks pose 
-a major risk, as adversaries can extract sensitive information from model 
+Despite these advantages, FL introduces several challenges, including
+vulnerability to inference attacks, communication overhead, and data
+heterogeneity \cite{khraisat2024}. In particular, inference attacks pose
+a major risk, as adversaries can extract sensitive information from model
 updates \cite{ameria2023}.
 
-Differential Privacy has been widely adopted as a defense mechanism 
-against such attacks, ensuring that individual data contributions 
-cannot be easily inferred \cite{owasp2023}. However, the addition of 
+Differential Privacy has been widely adopted as a defense mechanism
+against such attacks, ensuring that individual data contributions
+cannot be easily inferred \cite{owasp2023}. However, the addition of
 noise typically degrades model performance.
 
-Secure Aggregation, on the other hand, prevents the central server from 
-accessing individual client updates by using cryptographic techniques 
-such as homomorphic encryption \cite{khraisat2024}. While this method 
-preserves accuracy, it introduces additional computational and 
+Secure Aggregation, on the other hand, prevents the central server from
+accessing individual client updates by using cryptographic techniques
+such as homomorphic encryption \cite{khraisat2024}. While this method
+preserves accuracy, it introduces additional computational and
 communication overhead.
 
-Recent work has explored privacy-preserving FL for intrusion detection, 
-but often lacks comprehensive experimental evaluation using large-scale 
-datasets and industry frameworks \cite{torre2024}. Additionally, there 
-is limited analysis of the quantitative trade-off between privacy and 
-performance.
+Recent work has explored privacy-preserving FL for intrusion detection,
+but often lacks comprehensive experimental evaluation using large-scale
+datasets and industry frameworks \cite{torre2024}. Additionally, there
+is limited analysis of the quantitative trade-off between privacy,
+performance and computational cost in this context.
 
 \section{Methodology}
 
 \subsection{Dataset}
 
-Experiments were conducted using NetFlow-based datasets, which provide 
-aggregated representations of network traffic suitable for large-scale 
-intrusion detection \cite{luay2025}. These datasets include temporal 
-features that enable the detection of complex attack patterns.
+Experiments were conducted using the NetFlow-based dataset
+NF-CSE-CIC-IDS2018-v3. Which is based on NF-CSE-CIC-IDS2018, a dataset
+collected from a large scale infrastructure
+deployed in AWS, containing 50 attacker machines and 5 departments
+composed of 420 PCs and 30 servers \cite{csecicids2018} \cite{sharafaldin2018}.
+This dataset, provides aggregated representations of network traffic suitable
+for large-scale intrusion detection \cite{luay2025}. Due to hardware
+constraints, a representative subset of the main dataset was used for
+training and evaluation.
+
+To achieve a representative sample, there was a study done to analyze the
+main ports in the dataset, to then be grouped as follows:
+
+\begin{table}[h]
+    \centering
+    \renewcommand{\arraystretch}{1.3} % Better vertical spacing
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Category}                  & \textbf{Port} & \textbf{Flows}             & \textbf{Distribution}                                                                                        \\ \hline
+
+        % App Related Group
+        \multirow{3}{*}{App Ports}         & 80 (HTTP)     & \multirow{3}{*}{6,045,943} & \textbf{Benign:} 71.1\%                                                                                      \\ \cline{2-2}
+                                           & 8080 (HTTP)   &                            & \textbf{Attack:} 28.9\%                                                                                      \\ \cline{2-2}
+                                           & 443 (HTTPS)   &                            &                                                                                                              \\ \hline
+
+        % File Server Group
+        \multirow{6}{*}{File Server Ports} & 21 (FTP)      & \multirow{6}{*}{5,578,635} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 87.46\%\\ \textbf{Attack:} 12.54\%\end{tabular}} \\ \cline{2-2}
+                                           & 22 (SFTP)     &                            &                                                                                                              \\ \cline{2-2}
+                                           & 138 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
+                                           & 139 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
+                                           & 445 (SMB)     &                            &                                                                                                              \\ \cline{2-2}
+                                           & 3389 (RDP)    &                            &                                                                                                              \\ \hline
+
+        % AD and Other Group
+        \multirow{6}{*}{AD and Others}     & 53 (DNS)      & \multirow{6}{*}{7,385,573} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 98.54\%\\ \textbf{Attack:} 1.46\%\end{tabular}}  \\ \cline{2-2}
+                                           & 135 (RPC)     &                            &                                                                                                              \\ \cline{2-2}
+                                           & 500 (VPN)     &                            &                                                                                                              \\ \cline{2-2}
+                                           & 1433 (MSSQL)  &                            &                                                                                                              \\ \cline{2-2}
+                                           & 3306 (MySQL)  &                            &                                                                                                              \\ \cline{2-2}
+                                           & 5060 (VoIP)   &                            &                                                                                                              \\ \hline
+    \end{tabular}
+    \caption{Port Categories with Flow Distribution}
+    \label{tab:port_stats}
+\end{table}
+
+As shown in \autoref{tab:port_stats}, it can be observed that the AD and Others
+Category has a very high class imbalance, with only 1.46\% of the flows
+being attacks. To mitigate this imbalance, all the attack samples from this
+category were included in the training set, while only a representative sample
+of the benign flows were included. For the other two categories, a representative
+sample of both benign and attack flows were included in the training set.
+To be specific, for each category and class, the samples were sorted by their
+start time and the first 25\% of the samples were included in the training set,
+while the rest were discarded. This approach ensures that the training set is
+representative of the overall distribution while also addressing class imbalance
+in the AD and Others category. The resulting training subset then contains:
+
+\begin{table}[h]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Category}                  & \textbf{Port} & \textbf{Flows}             & \textbf{Distribution}                                                                                        \\ \hline
+
+        % App Related Group
+        \multirow{3}{*}{App Ports}         & 80 (HTTP)     & \multirow{3}{*}{1,511,485} & \textbf{Benign:} 71.1\%                                                                                      \\ \cline{2-2}
+                                           & 8080 (HTTP)   &                            & \textbf{Attack:} 28.9\%                                                                                      \\ \cline{2-2}
+                                           & 443 (HTTPS)   &                            &                                                                                                              \\ \hline
+
+        % File Server Group
+        \multirow{6}{*}{File Server Ports} & 21 (FTP)      & \multirow{6}{*}{1,394,658} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 87.46\%\\ \textbf{Attack:} 12.54\%\end{tabular}} \\ \cline{2-2}
+                                           & 22 (SFTP)     &                            &                                                                                                              \\ \cline{2-2}
+                                           & 138 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
+                                           & 139 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
+                                           & 445 (SMB)     &                            &                                                                                                              \\ \cline{2-2}
+                                           & 3389 (RDP)    &                            &                                                                                                              \\ \hline
+
+        % AD and Other Group
+        \multirow{6}{*}{AD and Others}     & 53 (DNS)      & \multirow{6}{*}{1,926,995} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 94.42\%\\ \textbf{Attack:} 5.58\%\end{tabular}}  \\ \cline{2-2}
+                                           & 135 (RPC)     &                            &                                                                                                              \\ \cline{2-2}
+                                           & 500 (VPN)     &                            &                                                                                                              \\ \cline{2-2}
+                                           & 1433 (MSSQL)  &                            &                                                                                                              \\ \cline{2-2}
+                                           & 3306 (MySQL)  &                            &                                                                                                              \\ \cline{2-2}
+                                           & 5060 (VoIP)   &                            &                                                                                                              \\ \hline
+    \end{tabular}
+    \caption{Final Sampled Subdataset Composition}
+    \label{tab:final_subdataset}
+\end{table}
+
+As shown in \autoref{tab:final_subdataset}, the final training subset contains
+still contains a significant number of samples, while being more manageable for 
+training and evaluation. This subset is used for all subsequent experiments in 
+this work.
+
+The decision behind the category strategy is due to real life constraints. 
+Where there is no prior knowledge of the attack distribution, and the training 
+data can't be grouped by attack type, but it can be grouped by port and
+related services. 
 
 \subsection{Centralized Baseline}
 
-A centralized model was first implemented to establish baseline 
+A centralized model was first implemented to establish baseline
 performance metrics, including:
 
 \begin{itemize}
@@ -118,7 +213,7 @@ performance metrics, including:
     \item Precision-Recall AUC
 \end{itemize}
 
-Computational cost was also measured with training time and data 
+Computational cost was also measured with training time and data
 transfered between clients and server.
 
 \begin{itemize}
@@ -128,12 +223,12 @@ transfered between clients and server.
 
 \subsection{Federated Learning Setup}
 
-The centralized model was adapted into a federated setting using 
-NVIDIA FLARE, an industry-grade framework designed for scalable 
-federated learning deployments \cite{roth2024}. The system consists 
+The centralized model was adapted into a federated setting using
+NVIDIA FLARE, an industry-grade framework designed for scalable
+federated learning deployments \cite{roth2024}. The system consists
 of multiple clients simulating distributed network environments.
 For each job configuration, the best global model is saved and evaluated
-after training. Additionally, the training metrics (F1 and PR-AUC) are 
+after training. Additionally, the training metrics (F1 and PR-AUC) are
 saved on each client for each round to later be plotted and analyzed.
 Lastly, the training time and data transfer are logged to evaluate
 the computational cost of the federated approach. \#TODO (describe pipeline,
@@ -142,10 +237,10 @@ and how is the server aggregating them, etc.)
 
 \subsection{Secure Aggregation}
 
-Secure Aggregation was implemented using homomorphic encryption 
-techniques to ensure that individual client updates remain private 
-during aggregation \cite{khraisat2024}. For the implementation, 
-the CKKS scheme was used \cite{cheon2017}. CKKS was selected for 
+Secure Aggregation was implemented using homomorphic encryption
+techniques to ensure that individual client updates remain private
+during aggregation \cite{khraisat2024}. For the implementation,
+the CKKS scheme was used \cite{cheon2017}. CKKS was selected for
 its efficiency in privacy-preserving ML. The following parameters were used:
 
 \begin{itemize}
@@ -157,9 +252,9 @@ its efficiency in privacy-preserving ML. The following parameters were used:
 
 \subsection{Differential Privacy}
 
-Differential Privacy was implemented by injecting Gaussian noise into 
-model updates. The noise multiplier was varied to evaluate its impact 
-on both privacy and performance, following standard DP practices 
+Differential Privacy was implemented by injecting Gaussian noise into
+model updates. The noise multiplier was varied to evaluate its impact
+on both privacy and performance, following standard DP practices
 \cite{owasp2023}.
 
 \subsection{Evaluation Metrics}
@@ -177,20 +272,20 @@ The following metrics were used:
 
 \subsection{Centralized vs Federated}
 
-The federated model achieved performance comparable to the centralized 
-baseline, with minor degradation due to non-IID data distribution across 
+The federated model achieved performance comparable to the centralized
+baseline, with minor degradation due to non-IID data distribution across
 clients, a known challenge in FL systems \cite{khraisat2024}.
 
 \subsection{Impact of Secure Aggregation}
 
-Secure Aggregation preserved model accuracy, as expected, since it 
-does not alter the learning process itself. However, it introduced 
-increased computational and communication costs due to cryptographic 
+Secure Aggregation preserved model accuracy, as expected, since it
+does not alter the learning process itself. However, it introduced
+increased computational and communication costs due to cryptographic
 operations \cite{torre2024}.
 
 \subsection{Impact of Differential Privacy}
 
-Differential Privacy introduced a clear trade-off between privacy and 
+Differential Privacy introduced a clear trade-off between privacy and
 performance. Higher noise levels resulted in:
 
 \begin{itemize}
@@ -199,7 +294,7 @@ performance. Higher noise levels resulted in:
     \item Improved privacy guarantees
 \end{itemize}
 
-These results are consistent with prior findings on DP in machine 
+These results are consistent with prior findings on DP in machine
 learning systems \cite{owasp2023}.
 
 \subsection{Trade-off Analysis}
@@ -208,41 +303,41 @@ A clear trade-off between privacy, performance, and cost was observed:
 
 \begin{itemize}
     \item SA: High computational cost, minimal accuracy loss
-    \item DP: Lower computational overhead, significant accuracy 
-    degradation depending on noise level
+    \item DP: Lower computational overhead, significant accuracy
+          degradation depending on noise level
 \end{itemize}
 
 \section{Discussion}
 
-The results demonstrate that Secure Aggregation is suitable when maintaining 
-model accuracy is critical, while Differential Privacy is necessary when 
+The results demonstrate that Secure Aggregation is suitable when maintaining
+model accuracy is critical, while Differential Privacy is necessary when
 strong privacy guarantees are required.
 
-However, combining both mechanisms introduces additional system complexity 
-and overhead. Prior work suggests that hybrid approaches can provide 
+However, combining both mechanisms introduces additional system complexity
+and overhead. Prior work suggests that hybrid approaches can provide
 stronger privacy guarantees but require careful tuning \cite{torre2024}.
 
-In practical deployments, selecting the appropriate mechanism depends on 
-the application’s privacy requirements, regulatory constraints, and 
+In practical deployments, selecting the appropriate mechanism depends on
+the application’s privacy requirements, regulatory constraints, and
 performance tolerance.
 
 \section{Conclusion}
 
-This work provides an empirical evaluation of privacy-preserving mechanisms 
+This work provides an empirical evaluation of privacy-preserving mechanisms
 in federated NIDS using realistic datasets and an industry-standard framework.
 
-The findings highlight the inherent trade-offs between privacy, performance, 
-and computational cost, offering practical insights for deploying federated 
+The findings highlight the inherent trade-offs between privacy, performance,
+and computational cost, offering practical insights for deploying federated
 learning systems in cybersecurity applications.
 
-Future work includes combining Differential Privacy and Secure Aggregation 
-in a unified framework and evaluating performance in real-world production 
+Future work includes combining Differential Privacy and Secure Aggregation
+in a unified framework and evaluating performance in real-world production
 environments.
 
 \section*{Acknowledgment}
 
-The authors thank the Universidad de los Andes for  all the academic 
-support provided. To all teachers, especially Ph.D. Yuri Andrea Pinto as 
+The authors thank the Universidad de los Andes for  all the academic
+support provided. To all teachers, especially Ph.D. Yuri Andrea Pinto as
 this thesis advisor.
 
 \bibliographystyle{IEEEtran}

@@ -98,6 +98,9 @@ def plot_hist_and_pr(out_path: str, errors: np.ndarray, labels: np.ndarray) -> N
 
     axes[0].hist(neg, bins=50, alpha=0.7, label="label 0", color="#4E79A7")
     axes[0].hist(pos, bins=50, alpha=0.7, label="label 1", color="#E15759")
+    if pos.size:
+        pos_med = float(np.median(pos))
+        axes[0].axvline(pos_med, linestyle="--", color="#E15759", linewidth=1.6, alpha=0.9)
     axes[0].set_title("Test score histogram")
     axes[0].set_xlabel("Anomaly score")
     axes[0].set_ylabel("Count")

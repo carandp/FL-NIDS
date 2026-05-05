@@ -133,8 +133,8 @@ def plot_hist_and_pr(
 
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
 
-    axes[0].hist(neg, bins=500, alpha=0.7, label="label 0", color="#4E79A7")
-    axes[0].hist(pos, bins=500, alpha=0.7, label="label 1", color="#E15759")
+    axes[0].hist(neg, bins=1000, alpha=0.7, label="label 0", color="#4E79A7")
+    axes[0].hist(pos, bins=1000, alpha=0.7, label="label 1", color="#E15759")
     axes[0].set_title("Test score histogram")
     axes[0].set_xlabel("Anomaly score")
     axes[0].set_ylabel("Count")

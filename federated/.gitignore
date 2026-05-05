@@ -27,3 +27,5 @@ jobs/*
 
 # Generated config files
 jobs/nids_fedavg/app/config/config_fed_client.json
+
+poc_workspace_legacy/
