@@ -6,6 +6,13 @@
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{silence}
+\WarningFilter{caption}{Unknown document class}
+\usepackage{caption}
+\usepackage{graphicx}
+
+\graphicspath{ {./images/} }
+\captionsetup[table]{skip=5pt}
 
 \title{Impact of Secure Aggregation and Differential Privacy on 
 Federated Network Intrusion Detection Systems}
@@ -24,20 +31,20 @@ Bogotá, Colombia\\
 \maketitle
 
 \begin{abstract}
-    Federated Learning (FL) enables collaborative training of machine learning
-    models without centralizing sensitive data, making it highly suitable for
-    Network Intrusion Detection Systems (NIDS). However, FL is vulnerable to
+    Federated Learning (FL) facilitates the joint training of machine
+    learning models without centralizing sensitive data, making it highly suitable
+    for Network Intrusion Detection Systems (NIDS). However, FL is vulnerable to
     inference attacks that may compromise training data privacy and data exposure
     attacks by honest-but-curious servers \cite{ameria2023}. To mitigate these
     risks, privacy-preserving mechanisms such as Differential Privacy (DP) and
     Secure Aggregation (SA) are employed \cite{khraisat2024}. This work presents
     an empirical evaluation of the impact of DP and SA on the performance of
-    a federated NIDS using industry-level framework (NVIDIA FLARE).
-    \#TODO (verify:
-    Results show that while SA preserves model accuracy with increased
-    computational cost, DP introduces a measurable degradation in performance
-    proportional to the noise level. A trade-off analysis between privacy,
-    performance, and computational cost is presented.)
+    a federated NIDS using industry-level framework NVIDIA FLARE (NVFlare).
+    % #TODO verify:
+    % Results show that while SA preserves model accuracy with increased
+    % computational cost, DP introduces a measurable degradation in performance
+    % proportional to the noise level. A trade-off analysis between privacy,
+    % performance, and computational cost is presented.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -65,9 +72,9 @@ DP and SA are integrated into FL pipelines \cite{khraisat2024}. DP protects
 individual data points by injecting controlled noise, while SA ensures
 that the server only observes aggregated model updates.
 
-This paper evaluates the impact of these mechanisms on model performance
-and computational cost in a realistic federated NIDS setting using
-industry-standard framework (NVIDIA FLARE).
+This paper evaluates the impact of these mechanisms on model performance,
+privacy, and computational cost in a realistic federated NIDS setting using
+industry-standard framework NVFlare.
 
 \section{Related Work}
 
@@ -83,12 +90,12 @@ heterogeneity \cite{khraisat2024}. In particular, inference attacks pose
 a major risk, as adversaries can extract sensitive information from model
 updates \cite{ameria2023}.
 
-Differential Privacy has been widely adopted as a defense mechanism
+DP has been widely adopted as a defense mechanism
 against such attacks, ensuring that individual data contributions
 cannot be easily inferred \cite{owasp2023}. However, the addition of
 noise typically degrades model performance.
 
-Secure Aggregation, on the other hand, prevents the central server from
+SA, on the other hand, prevents the central server from
 accessing individual client updates by using cryptographic techniques
 such as homomorphic encryption \cite{khraisat2024}. While this method
 preserves accuracy, it introduces additional computational and
@@ -102,48 +109,62 @@ performance and computational cost in this context.
 
 \section{Methodology}
 
+\subsection{Experimental Setup}
+
+All experiments were conducted on a single NVIDIA RTX 4090 GPU with 24GB of
+memory, a Ryzen 5800x3D CPU and 32GB of RAM. This setup reflects
+a high end consumer-grade machine, which is more accessible than
+enterprise-grade hardware while still providing sufficient computational
+power for training complex models.
+
+For the experiments, NVFlare framework was used to implement the
+federated learning pipeline. The framework was runned in a WSL environment
+on the same machine, simulating multiple clients for the federated setup.
+The same codebase was used for both the centralized and federated experiments
+to ensure a fair comparison. The code is available in the following repository:
+\url{https://github.com/carandp/FL-NIDS}.
+
 \subsection{Dataset}
 
-Experiments were conducted using the NetFlow-based dataset
-NF-CSE-CIC-IDS2018-v3. Which is based on NF-CSE-CIC-IDS2018, a dataset
-collected from a large scale infrastructure
-deployed in AWS, containing 50 attacker machines and 5 departments
-composed of 420 PCs and 30 servers \cite{csecicids2018} \cite{sharafaldin2018}.
-This dataset, provides aggregated representations of network traffic suitable
-for large-scale intrusion detection \cite{luay2025}. Due to hardware
-constraints, a representative subset of the main dataset was used for
-training and evaluation.
+The NF-CSE-CIC-IDS2018-v3 dataset was used in the experiments.
+The dataset is derived from NF-CSE-CIC-IDS2018, a dataset collected from
+a large scale infrastructure deployed in AWS, containing 50 attacker
+machines and 5 departments composed of 420 PCs and 30 servers \cite{csecicids2018}
+\cite{sharafaldin2018}. This dataset, provides aggregated representations
+of network traffic suitable for large-scale intrusion detection \cite{luay2025}.
+Due to hardware constraints, a representative subset of the main dataset
+was used for training and evaluation.
 
 To achieve a representative sample, there was a study done to analyze the
 main ports in the dataset, to then be grouped as follows:
 
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \renewcommand{\arraystretch}{1.3} % Better vertical spacing
     \begin{tabular}{|l|l|l|l|}
         \hline
-        \textbf{Category}                  & \textbf{Port} & \textbf{Flows}             & \textbf{Distribution}                                                                                        \\ \hline
+        \textbf{Category}              & \textbf{Port} & \textbf{Flows}             & \textbf{Distribution}                                                                                        \\ \hline
 
         % App Related Group
-        \multirow{3}{*}{App Ports}         & 80 (HTTP)     & \multirow{3}{*}{6,045,943} & \textbf{Benign:} 71.1\%                                                                                      \\ \cline{2-2}
-                                           & 8080 (HTTP)   &                            & \textbf{Attack:} 28.9\%                                                                                      \\ \cline{2-2}
-                                           & 443 (HTTPS)   &                            &                                                                                                              \\ \hline
+        \multirow{3}{*}{App}           & 80 (HTTP)     & \multirow{3}{*}{6,045,943} & \textbf{Benign:} 71.1\%                                                                                      \\ \cline{2-2}
+                                       & 8080 (HTTP)   &                            & \textbf{Attack:} 28.9\%                                                                                      \\ \cline{2-2}
+                                       & 443 (HTTPS)   &                            &                                                                                                              \\ \hline
 
         % File Server Group
-        \multirow{6}{*}{File Server Ports} & 21 (FTP)      & \multirow{6}{*}{5,578,635} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 87.46\%\\ \textbf{Attack:} 12.54\%\end{tabular}} \\ \cline{2-2}
-                                           & 22 (SFTP)     &                            &                                                                                                              \\ \cline{2-2}
-                                           & 138 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
-                                           & 139 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
-                                           & 445 (SMB)     &                            &                                                                                                              \\ \cline{2-2}
-                                           & 3389 (RDP)    &                            &                                                                                                              \\ \hline
+        \multirow{6}{*}{File Server}   & 21 (FTP)      & \multirow{6}{*}{5,578,635} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 87.46\%\\ \textbf{Attack:} 12.54\%\end{tabular}} \\ \cline{2-2}
+                                       & 22 (SFTP)     &                            &                                                                                                              \\ \cline{2-2}
+                                       & 138 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
+                                       & 139 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
+                                       & 445 (SMB)     &                            &                                                                                                              \\ \cline{2-2}
+                                       & 3389 (RDP)    &                            &                                                                                                              \\ \hline
 
         % AD and Other Group
-        \multirow{6}{*}{AD and Others}     & 53 (DNS)      & \multirow{6}{*}{7,385,573} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 98.54\%\\ \textbf{Attack:} 1.46\%\end{tabular}}  \\ \cline{2-2}
-                                           & 135 (RPC)     &                            &                                                                                                              \\ \cline{2-2}
-                                           & 500 (VPN)     &                            &                                                                                                              \\ \cline{2-2}
-                                           & 1433 (MSSQL)  &                            &                                                                                                              \\ \cline{2-2}
-                                           & 3306 (MySQL)  &                            &                                                                                                              \\ \cline{2-2}
-                                           & 5060 (VoIP)   &                            &                                                                                                              \\ \hline
+        \multirow{6}{*}{AD and Others} & 53 (DNS)      & \multirow{6}{*}{7,385,573} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 98.54\%\\ \textbf{Attack:} 1.46\%\end{tabular}}  \\ \cline{2-2}
+                                       & 135 (RPC)     &                            &                                                                                                              \\ \cline{2-2}
+                                       & 500 (VPN)     &                            &                                                                                                              \\ \cline{2-2}
+                                       & 1433 (MSSQL)  &                            &                                                                                                              \\ \cline{2-2}
+                                       & 3306 (MySQL)  &                            &                                                                                                              \\ \cline{2-2}
+                                       & 5060 (VoIP)   &                            &                                                                                                              \\ \hline
     \end{tabular}
     \caption{Port Categories with Flow Distribution}
     \label{tab:port_stats}
@@ -161,178 +182,278 @@ while the rest were discarded. This approach ensures that the training set is
 representative of the overall distribution while also addressing class imbalance
 in the AD and Others category. The resulting training subset then contains:
 
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \renewcommand{\arraystretch}{1.3}
     \begin{tabular}{|l|l|l|l|}
         \hline
-        \textbf{Category}                  & \textbf{Port} & \textbf{Flows}             & \textbf{Distribution}                                                                                        \\ \hline
+        \textbf{Category}              & \textbf{Port} & \textbf{Flows}             & \textbf{Distribution}                                                                                        \\ \hline
 
         % App Related Group
-        \multirow{3}{*}{App Ports}         & 80 (HTTP)     & \multirow{3}{*}{1,511,485} & \textbf{Benign:} 71.1\%                                                                                      \\ \cline{2-2}
-                                           & 8080 (HTTP)   &                            & \textbf{Attack:} 28.9\%                                                                                      \\ \cline{2-2}
-                                           & 443 (HTTPS)   &                            &                                                                                                              \\ \hline
+        \multirow{3}{*}{App}           & 80 (HTTP)     & \multirow{3}{*}{1,511,485} & \textbf{Benign:} 71.1\%                                                                                      \\ \cline{2-2}
+                                       & 8080 (HTTP)   &                            & \textbf{Attack:} 28.9\%                                                                                      \\ \cline{2-2}
+                                       & 443 (HTTPS)   &                            &                                                                                                              \\ \hline
 
         % File Server Group
-        \multirow{6}{*}{File Server Ports} & 21 (FTP)      & \multirow{6}{*}{1,394,658} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 87.46\%\\ \textbf{Attack:} 12.54\%\end{tabular}} \\ \cline{2-2}
-                                           & 22 (SFTP)     &                            &                                                                                                              \\ \cline{2-2}
-                                           & 138 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
-                                           & 139 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
-                                           & 445 (SMB)     &                            &                                                                                                              \\ \cline{2-2}
-                                           & 3389 (RDP)    &                            &                                                                                                              \\ \hline
+        \multirow{6}{*}{File Server}   & 21 (FTP)      & \multirow{6}{*}{1,394,658} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 87.46\%\\ \textbf{Attack:} 12.54\%\end{tabular}} \\ \cline{2-2}
+                                       & 22 (SFTP)     &                            &                                                                                                              \\ \cline{2-2}
+                                       & 138 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
+                                       & 139 (NetBIOS) &                            &                                                                                                              \\ \cline{2-2}
+                                       & 445 (SMB)     &                            &                                                                                                              \\ \cline{2-2}
+                                       & 3389 (RDP)    &                            &                                                                                                              \\ \hline
 
         % AD and Other Group
-        \multirow{6}{*}{AD and Others}     & 53 (DNS)      & \multirow{6}{*}{1,926,995} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 94.42\%\\ \textbf{Attack:} 5.58\%\end{tabular}}  \\ \cline{2-2}
-                                           & 135 (RPC)     &                            &                                                                                                              \\ \cline{2-2}
-                                           & 500 (VPN)     &                            &                                                                                                              \\ \cline{2-2}
-                                           & 1433 (MSSQL)  &                            &                                                                                                              \\ \cline{2-2}
-                                           & 3306 (MySQL)  &                            &                                                                                                              \\ \cline{2-2}
-                                           & 5060 (VoIP)   &                            &                                                                                                              \\ \hline
+        \multirow{6}{*}{AD and Others} & 53 (DNS)      & \multirow{6}{*}{1,926,995} & \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textbf{Benign:} 94.42\%\\ \textbf{Attack:} 5.58\%\end{tabular}}  \\ \cline{2-2}
+                                       & 135 (RPC)     &                            &                                                                                                              \\ \cline{2-2}
+                                       & 500 (VPN)     &                            &                                                                                                              \\ \cline{2-2}
+                                       & 1433 (MSSQL)  &                            &                                                                                                              \\ \cline{2-2}
+                                       & 3306 (MySQL)  &                            &                                                                                                              \\ \cline{2-2}
+                                       & 5060 (VoIP)   &                            &                                                                                                              \\ \hline
     \end{tabular}
     \caption{Final Sampled Subdataset Composition}
     \label{tab:final_subdataset}
 \end{table}
 
 As shown in \autoref{tab:final_subdataset}, the final training subset contains
-still contains a significant number of samples, while being more manageable for 
-training and evaluation. This subset is used for all subsequent experiments in 
+still contains a significant number of samples, while being more manageable for
+training and evaluation. This subset is used for all subsequent experiments in
 this work.
 
-The decision behind the category strategy is due to real life constraints. 
-Where there is no prior knowledge of the attack distribution, and the training 
+The decision behind the category strategy is due to real life constraints.
+Where there is no prior knowledge of the attack distribution, and the training
 data can't be grouped by attack type, but it can be grouped by port and
-related services. 
+related services.
 
 \subsection{Centralized Baseline}
 
-A centralized model was first implemented to establish baseline
-performance metrics, including:
+For the centralized baseline, a Graph Neural Network (GNN) architecture
+was adopted, specifically GraphIDS \cite{guerra2025}. GraphIDS is a
+self-supervised intrusion detection model designed to learn normal
+network behavior directly from data without requiring labeled attacks.
+It operates by first using an inductive GNN to generate embeddings
+of each network flow, capturing its local topological context within
+the communication graph. These embeddings are then processed by a
+Transformer-based encoder-decoder structured as a masked autoencoder,
+which reconstructs partially hidden representations. Through this
+reconstruction task, the model learns both local structural patterns
+and global co-occurrence relationships via self-attention. Deviations
+from these learned patterns can subsequently be identified as
+potential intrusions. The architecture of the training pipeline,
+originally proposed by Guerra et al. \cite{guerra2025}, is shown in
+\autoref{fig:guerra_model}.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{guerra_pipeline}
+    \caption{Overview of the GraphIDS training pipeline (adapted from \cite{guerra2025}, Figure 3).}
+    \label{fig:guerra_model}
+\end{figure*}
+
+For the centralized baseline, the training process was monitored
+using the following performance metrics:
 
 \begin{itemize}
     \item Macro F1-score
     \item Precision-Recall AUC
-\end{itemize}
-
-Computational cost was also measured with training time and data
-transfered between clients and server.
-
-\begin{itemize}
     \item Training time (seconds)
-    \item Data transfer volume (MB)
 \end{itemize}
 
 \subsection{Federated Learning Setup}
 
 The centralized model was adapted into a federated setting using
-NVIDIA FLARE, an industry-grade framework designed for scalable
+NVFlare, an industry-grade framework designed for scalable
 federated learning deployments \cite{roth2024}. The system consists
 of multiple clients simulating distributed network environments.
 For each job configuration, the best global model is saved and evaluated
 after training. Additionally, the training metrics (F1 and PR-AUC) are
 saved on each client for each round to later be plotted and analyzed.
 Lastly, the training time and data transfer are logged to evaluate
-the computational cost of the federated approach. \#TODO (describe pipeline,
-how is fedavg being done, how are the clients sending their updates to the server
-and how is the server aggregating them, etc.)
+the computational cost of the federated approach.
+
+For the federated experiments, the same model architecture and training
+hyperparameters were used as in the centralized baseline to ensure a fair
+comparison. The federated training process was monitored using the same
+performance metrics as the centralized baseline, along with the additional
+metric of communication overhead (measured in terms of data transferred
+between clients and server).
+
+To simulate a realistic federated learning scenario, NVFlare was configured
+to run in Proof Of Concept (POC) mode \cite{nvflare_poc_doc}. The POC command
+enables a proof-of-concept setup on a single machine. In this configuration,
+separate processes emulate the server, clients, and admin console, providing
+a practical environment to test and validate workflows before moving to a fully
+distributed deployment.
+
+For future reference in the paper, the clients data distribution can be seen
+in \autoref{tab:client_mapping}:
+
+\begin{table}[ht]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Client ID} & \textbf{Data Subsample} \\ \hline
+        client0 & App \\ \hline
+        client1 & File Server \\ \hline
+        client2 & AD and Other \\ \hline
+    \end{tabular}
+    \caption{Mapping of Client IDs to Network Traffic Subsamples}
+    \label{tab:client_mapping}
+\end{table}
+
+% #TODO describe pipeline, how is fedavg being done, how are the clients 
+% sending their updates to the server and how is the server aggregating them, etc.
 
 \subsection{Secure Aggregation}
 
-Secure Aggregation was implemented using homomorphic encryption
-techniques to ensure that individual client updates remain private
-during aggregation \cite{khraisat2024}. For the implementation,
-the CKKS scheme was used \cite{cheon2017}. CKKS was selected for
-its efficiency in privacy-preserving ML. The following parameters were used:
+% #TODO: WIP
 
-\begin{itemize}
-    \item \texttt{poly\_modulus\_degree}: 8192
-    \item \texttt{coeff\_mod\_bit\_sizes}: [60, 40, 40]
-\end{itemize}
+% Secure Aggregation was implemented using homomorphic encryption
+% techniques to ensure that individual client updates remain private
+% during aggregation \cite{khraisat2024}. For the implementation,
+% the CKKS scheme was used \cite{cheon2017}. CKKS was selected for
+% its efficiency in privacy-preserving ML. The following parameters were used:
 
-\#TODO (describe what and why of the parameters)
+% \begin{itemize}
+%     \item \texttt{poly\_modulus\_degree}: 8192
+%     \item \texttt{coeff\_mod\_bit\_sizes}: [60, 40, 40]
+% \end{itemize}
 
 \subsection{Differential Privacy}
 
-Differential Privacy was implemented by injecting Gaussian noise into
-model updates. The noise multiplier was varied to evaluate its impact
-on both privacy and performance, following standard DP practices
-\cite{owasp2023}.
+% #TODO: WIP
 
-\subsection{Evaluation Metrics}
+% Differential Privacy was implemented by injecting Gaussian noise into
+% model updates. The noise multiplier was varied to evaluate its impact
+% on both privacy and performance, following standard DP practices
+% \cite{owasp2023}.
 
-The following metrics were used:
+% \subsection{Evaluation Metrics}
 
-\begin{itemize}
-    \item Macro F1-score
-    \item PR-AUC
-    \item Privacy budget ($\epsilon$)
-    \item Computational overhead
-\end{itemize}
+% The following metrics were used:
+
+% \begin{itemize}
+%     \item Macro F1-score
+%     \item PR-AUC
+%     \item Privacy budget ($\epsilon$)
+%     \item Computational overhead
+% \end{itemize}
 
 \section{Results}
 
+\subsection{Centralized Baseline}
+
+The paper describing GraphIDS reports a macro F1-score of 0.9447 and
+a PR-AUC of 0.8819 on the NF-CSE-CIC-IDS2018-v3 dataset \cite{guerra2025}.
+The model ran on a single NVIDIA A100 GPU with 40GB of memory, for our
+experiments, the model ran on a single NVIDIA RTX 4090 GPU with 24GB of
+memory. The obtained results were a macro F1-score of 0.9517 and
+a PR-AUC of 0.8939, which are slightly higher than those reported in the
+original paper, which can be attributed to differences in hardware.
+
+The centralized model was trained with both the final subsample of the
+dataset, and a non balanced version of the dataset (AD and Others category).
+The results are as follows:
+
+\begin{table}[ht]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \textbf{Metric} & \textbf{Final Subsample} & \textbf{Unbalanced Subsample} \\ \hline
+        Macro F1-score  & 0.9205                   & 0.9385                        \\ \hline
+        PR-AUC          & 0.6612                   & 0.6471                        \\ \hline
+    \end{tabular}
+    \caption{Model Performance Comparison Across Subsets}
+    \label{tab:performance_comparison}
+\end{table}
+
+As shown in \autoref{tab:performance_comparison}, the model trained on the
+final subsample achieved a higher PR-AUC but a lower F1-score compared to the
+model trained on the unbalanced subsample. This suggests that while the final
+subsample may have improved the model's ability to distinguish between classes
+(as reflected in the higher PR-AUC), it may have also introduced some noise or
+reduced the model's overall accuracy (as reflected in the lower F1-score). The
+unbalanced subsample, on the other hand, may have allowed the model to achieve a
+higher F1-score by leveraging the class imbalance, but at the cost of a lower
+PR-AUC, indicating that the model may have struggled to effectively identify
+positive samples in the presence of the imbalance.
+
 \subsection{Centralized vs Federated}
 
-The federated model achieved performance comparable to the centralized
-baseline, with minor degradation due to non-IID data distribution across
-clients, a known challenge in FL systems \cite{khraisat2024}.
+% #TODO: WIP
+
+% The federated model achieved performance comparable to the centralized
+% baseline, with minor degradation due to non-IID data distribution across
+% clients, a known challenge in FL systems \cite{khraisat2024}.
 
 \subsection{Impact of Secure Aggregation}
 
-Secure Aggregation preserved model accuracy, as expected, since it
-does not alter the learning process itself. However, it introduced
-increased computational and communication costs due to cryptographic
-operations \cite{torre2024}.
+% #TODO: WIP
+
+% Secure Aggregation preserved model accuracy, as expected, since it
+% does not alter the learning process itself. However, it introduced
+% increased computational and communication costs due to cryptographic
+% operations \cite{torre2024}.
 
 \subsection{Impact of Differential Privacy}
 
-Differential Privacy introduced a clear trade-off between privacy and
-performance. Higher noise levels resulted in:
+% #TODO: WIP
 
-\begin{itemize}
-    \item Lower F1-score
-    \item Reduced PR-AUC
-    \item Improved privacy guarantees
-\end{itemize}
+% Differential Privacy introduced a clear trade-off between privacy and
+% performance. Higher noise levels resulted in:
 
-These results are consistent with prior findings on DP in machine
-learning systems \cite{owasp2023}.
+% \begin{itemize}
+%     \item Lower F1-score
+%     \item Reduced PR-AUC
+%     \item Improved privacy guarantees
+% \end{itemize}
+
+% These results are consistent with prior findings on DP in machine
+% learning systems \cite{owasp2023}.
 
 \subsection{Trade-off Analysis}
 
-A clear trade-off between privacy, performance, and cost was observed:
+% #TODO: WIP
 
-\begin{itemize}
-    \item SA: High computational cost, minimal accuracy loss
-    \item DP: Lower computational overhead, significant accuracy
-          degradation depending on noise level
-\end{itemize}
+% A clear trade-off between privacy, performance, and cost was observed:
+
+% \begin{itemize}
+%     \item SA: High computational cost, minimal accuracy loss
+%     \item DP: Lower computational overhead, significant accuracy
+%           degradation depending on noise level
+% \end{itemize}
 
 \section{Discussion}
 
-The results demonstrate that Secure Aggregation is suitable when maintaining
-model accuracy is critical, while Differential Privacy is necessary when
-strong privacy guarantees are required.
+% #TODO: WIP
 
-However, combining both mechanisms introduces additional system complexity
-and overhead. Prior work suggests that hybrid approaches can provide
-stronger privacy guarantees but require careful tuning \cite{torre2024}.
+% The results demonstrate that Secure Aggregation is suitable when maintaining
+% model accuracy is critical, while Differential Privacy is necessary when
+% strong privacy guarantees are required.
 
-In practical deployments, selecting the appropriate mechanism depends on
-the application’s privacy requirements, regulatory constraints, and
-performance tolerance.
+% However, combining both mechanisms introduces additional system complexity
+% and overhead. Prior work suggests that hybrid approaches can provide
+% stronger privacy guarantees but require careful tuning \cite{torre2024}.
+
+% In practical deployments, selecting the appropriate mechanism depends on
+% the application’s privacy requirements, regulatory constraints, and
+% performance tolerance.
 
 \section{Conclusion}
 
-This work provides an empirical evaluation of privacy-preserving mechanisms
-in federated NIDS using realistic datasets and an industry-standard framework.
+% #TODO: WIP
 
-The findings highlight the inherent trade-offs between privacy, performance,
-and computational cost, offering practical insights for deploying federated
-learning systems in cybersecurity applications.
+% This work provides an empirical evaluation of privacy-preserving mechanisms
+% in federated NIDS using realistic datasets and an industry-standard framework.
 
-Future work includes combining Differential Privacy and Secure Aggregation
-in a unified framework and evaluating performance in real-world production
-environments.
+% The findings highlight the inherent trade-offs between privacy, performance,
+% and computational cost, offering practical insights for deploying federated
+% learning systems in cybersecurity applications.
+
+% Future work includes combining Differential Privacy and Secure Aggregation
+% in a unified framework and evaluating performance in real-world production
+% environments.
 
 \section*{Acknowledgment}
 
