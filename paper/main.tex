@@ -322,6 +322,14 @@ in \autoref{tab:client_mapping}:
 \subsection{Differential Privacy}
 
 % #TODO: WIP
+% USE We utilize the Opacus2 library [17] to implement DP-SGD 
+% on each client during local training!!!
+
+In official papers published by NVIDIA researchers, the Opacus
+library was used to implement DP-SGD on each client during local training
+\cite{roth2026}. Opacus is a widely used library for integrating
+differential privacy into PyTorch models, providing efficient implementations
+of DP-SGD and tools for tracking privacy budgets.
 
 % Differential Privacy was implemented by injecting Gaussian noise into
 % model updates. The noise multiplier was varied to evaluate its impact
