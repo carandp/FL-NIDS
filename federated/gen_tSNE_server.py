@@ -163,6 +163,14 @@ def main():
         (axes[1], Z_rec,  "Reconstructed Edge Embeddings (t-SNE)"),
     ]
 
+    # Use robust axis limits so a few extreme points do not squash the main cluster.
+    def robust_limits(Z, low=0.1, high=99.9, pad=0.2):
+        x_low, x_high = np.percentile(Z[:, 0], [low, high])
+        y_low, y_high = np.percentile(Z[:, 1], [low, high])
+        x_pad = (x_high - x_low) * pad
+        y_pad = (y_high - y_low) * pad
+        return (x_low - x_pad, x_high + x_pad), (y_low - y_pad, y_high + y_pad)
+
     for ax, Z, title in plots:
         benign_mask = combined_labels == "Benign"
         attack_mask = combined_labels == "Attack"
@@ -208,6 +216,10 @@ def main():
         ax.set_xlabel("t-SNE dimension 1")
         ax.set_ylabel("t-SNE dimension 2")
         ax.grid(True, linestyle="--", alpha=0.25)
+
+        (xlim_low, xlim_high), (ylim_low, ylim_high) = robust_limits(Z)
+        ax.set_xlim(xlim_low, xlim_high)
+        ax.set_ylim(ylim_low, ylim_high)
 
         legend_elements = [
             Patch(facecolor="#2b6cb0", edgecolor="none", alpha=0.65, label=f"Benign (n={benign_count:,}, subsampled)"),

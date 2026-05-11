@@ -68,7 +68,7 @@ Training progress is printed to the same terminal. Each round logs the local epo
 
 Once all rounds complete (you will see `FINISHED:COMPLETED` in the logs), download the job output at the `>` prompt:
 
-```
+```bash
 download_job <job_id>
 ```
 
