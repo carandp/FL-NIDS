@@ -145,17 +145,30 @@ def _normalize_client_name(client: str | None) -> str | None:
 def build_loaders(args):
     fed_clients_root = os.path.abspath(os.path.join(args.data_dir, "fed_clients"))
     client_name = _normalize_client_name(args.client)
+    def _resolve_client_dir(client_id: str) -> str:
+        pyg_root = os.path.join(fed_clients_root, client_id, "pyg_graph_data")
+        explicit = os.path.join(pyg_root, f"client_{client_id}")
+        if os.path.isdir(explicit):
+            return explicit
+        if not os.path.isdir(pyg_root):
+            return explicit
+        candidates = [
+            os.path.join(pyg_root, d)
+            for d in sorted(os.listdir(pyg_root))
+            if os.path.isdir(os.path.join(pyg_root, d))
+        ]
+        prefix = f"client_{client_id}"
+        for d in candidates:
+            if os.path.basename(d).startswith(prefix):
+                return d
+        if len(candidates) == 1:
+            return candidates[0]
+        return explicit
+
     if client_name:
-        client_dirs = [
-            os.path.join(
-                fed_clients_root, client_name, "pyg_graph_data", f"client_{client_name}"
-            )
-        ]
+        client_dirs = [_resolve_client_dir(client_name)]
     else:
-        client_dirs = [
-            os.path.join(fed_clients_root, f"client{i}", "pyg_graph_data", f"client_client{i}")
-            for i in range(3)
-        ]
+        client_dirs = [_resolve_client_dir(f"client{i}") for i in range(3)]
     val_graph = load_and_merge_client_graphs("val", client_dirs)
     test_graph = load_and_merge_client_graphs("test", client_dirs)
     ndim_in = val_graph.x.shape[1]

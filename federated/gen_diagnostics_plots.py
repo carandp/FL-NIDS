@@ -57,7 +57,8 @@ def build_test_loader(args, client_name: str):
     test_graph = torch.load(os.path.join(client_dir, "test.pt"))[0]
 
     fanout_list = [args.fanout] if args.fanout != -1 else [-1]
-    num_workers = min(os.cpu_count() or 0, 8)
+    # Safer default: avoid multiprocessing to prevent queue/semaphore shutdown errors.
+    num_workers = args.num_workers
     shuffle = args.positional_encoding == "None"
 
     test_loader = LinkNeighborLoader(
@@ -125,6 +126,12 @@ def main() -> None:
     parser.add_argument("--ae_batch_size", type=int, default=64)
     parser.add_argument("--window_size", type=int, default=512)
     parser.add_argument("--fanout", type=int, default=-1)
+    parser.add_argument(
+        "--num_workers",
+        type=int,
+        default=0,
+        help="Dataloader workers. Use 0 to avoid multiprocessing issues.",
+    )
     parser.add_argument("--clients", type=str, default="client0,client1,client2")
     parser.add_argument(
         "--model",

@@ -13,6 +13,10 @@ def get_loaders(
     shuffle: bool = True,
     seed: int = 42,
     client_id: str = None,
+    oversample_min_ratio: float = 0.05,
+    oversample_target_ratio: float = 0.3,
+    oversample_method: str = "borderline-1",
+    oversample_random_state: int = 42,
 ):
     dataset = NetFlowDataset(
         name=dataset_name,
@@ -22,6 +26,10 @@ def get_loaders(
         data_type="benign",
         seed=seed,
         client_id=client_id,  # Use client_id from fed_clients
+        oversample_min_ratio=oversample_min_ratio,
+        oversample_target_ratio=oversample_target_ratio,
+        oversample_method=oversample_method,
+        oversample_random_state=oversample_random_state,
     )
 
     ndim_in = dataset.num_node_features

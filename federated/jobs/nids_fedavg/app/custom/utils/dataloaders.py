@@ -1,3 +1,4 @@
+import inspect
 import os
 import pickle
 import shutil
@@ -59,6 +60,10 @@ class NetFlowDataset:
         data_type="benign",
         seed=42,
         client_id=None,
+        oversample_min_ratio=0.05,
+        oversample_target_ratio=0.3,
+        oversample_method="borderline-1",
+        oversample_random_state=42,
     ):
         self.name = name
         self.data_dir = data_dir
@@ -66,19 +71,34 @@ class NetFlowDataset:
         self.data_type = data_type
         self.seed = seed
         self.client_id = client_id
+        self.oversample_min_ratio = oversample_min_ratio
+        self.oversample_target_ratio = oversample_target_ratio
+        self.oversample_method = oversample_method
+        self.oversample_random_state = oversample_random_state
 
         # Setup directories
         graph_dir = os.path.join(data_dir, "pyg_graph_data")
         
+        oversample_tag = None
+        if self.oversample_min_ratio is not None and self.oversample_target_ratio is not None:
+            min_tag = int(self.oversample_min_ratio * 100)
+            target_tag = int(self.oversample_target_ratio * 100)
+            oversample_tag = f"os{min_tag}_{target_tag}_{self.oversample_method}"
+
         # When loading from fed_clients, use client_id in directory name
         if client_id is not None:
-            self.processed_dir = os.path.join(graph_dir, f"client_{client_id}")
+            base_dir = os.path.join(graph_dir, f"client_{client_id}")
         elif fraction is not None:
             assert 0 < fraction < 1
             fraction_str = str(fraction).replace(".", "_")
-            self.processed_dir = os.path.join(graph_dir, f"{name}_{fraction_str}")
+            base_dir = os.path.join(graph_dir, f"{name}_{fraction_str}")
         else:
-            self.processed_dir = os.path.join(graph_dir, name)
+            base_dir = os.path.join(graph_dir, name)
+
+        if oversample_tag:
+            self.processed_dir = f"{base_dir}_{oversample_tag}"
+        else:
+            self.processed_dir = base_dir
 
         self.raw_dir = os.path.join(data_dir, name)
 
@@ -250,6 +270,8 @@ class NetFlowDataset:
             stratify=df_val_test["Attack"],
         )
 
+        df_train = self._maybe_oversample_train(df_train, edge_features)
+
         if "v3" in self.name:
             df_train = df_train.sort_values(by="FLOW_START_MILLISECONDS")
             df_val = df_val.sort_values(by="FLOW_START_MILLISECONDS")
@@ -296,6 +318,87 @@ class NetFlowDataset:
             f.write(str(self.seed))
 
         print("Done!")
+
+    def _maybe_oversample_train(self, df_train, edge_features):
+        if self.oversample_min_ratio is None or self.oversample_target_ratio is None:
+            return df_train
+
+        if "Label" not in df_train.columns:
+            return df_train
+
+        label_counts = df_train["Label"].value_counts()
+        if len(label_counts) < 2:
+            return df_train
+
+        minority_label = label_counts.idxmin()
+        minority_ratio = label_counts.min() / label_counts.sum()
+        if minority_ratio >= self.oversample_min_ratio:
+            return df_train
+
+        try:
+            from imblearn.over_sampling import BorderlineSMOTE
+        except ImportError:
+            print(
+                "Imbalanced-learn is not installed; skipping local oversampling. "
+                "Install imbalanced-learn to enable SMOTE-based balancing."
+            )
+            return df_train
+
+        smote_kwargs = {
+            "sampling_strategy": self.oversample_target_ratio,
+            "random_state": self.oversample_random_state,
+        }
+        if "kind" in inspect.signature(BorderlineSMOTE).parameters:
+            smote_kwargs["kind"] = self.oversample_method
+
+        smote = BorderlineSMOTE(**smote_kwargs)
+
+        x = df_train[edge_features].to_numpy()
+        y = df_train["Label"].to_numpy()
+        x_resampled, y_resampled = smote.fit_resample(x, y)
+
+        if len(x_resampled) == len(df_train):
+            return df_train
+
+        df_features = pd.DataFrame(x_resampled, columns=edge_features)
+        labels_resampled = pd.Series(y_resampled, name="Label").astype(df_train["Label"].dtype)
+
+        passthrough_cols = [
+            col for col in df_train.columns if col not in edge_features + ["Label"]
+        ]
+        if passthrough_cols:
+            num_new = len(df_features) - len(df_train)
+            if num_new > 0:
+                sample_rows = (
+                    df_train[df_train["Label"] == minority_label][passthrough_cols]
+                    .sample(
+                        n=num_new,
+                        replace=True,
+                        random_state=self.oversample_random_state,
+                    )
+                    .reset_index(drop=True)
+                )
+                passthrough_resampled = pd.concat(
+                    [df_train[passthrough_cols].reset_index(drop=True), sample_rows],
+                    ignore_index=True,
+                )
+            else:
+                passthrough_resampled = df_train[passthrough_cols].reset_index(drop=True)
+
+            df_train = pd.concat(
+                [df_features, labels_resampled, passthrough_resampled], axis=1
+            )
+        else:
+            df_train = pd.concat([df_features, labels_resampled], axis=1)
+
+        new_counts = df_train["Label"].value_counts()
+        new_ratio = new_counts.min() / new_counts.sum()
+        print(
+            "Applied local oversampling: "
+            f"minority_ratio {minority_ratio:.4f} -> {new_ratio:.4f} "
+            f"(target={self.oversample_target_ratio})"
+        )
+        return df_train
 
     def __len__(self):
         # Return total number of graphs (for compatibility)

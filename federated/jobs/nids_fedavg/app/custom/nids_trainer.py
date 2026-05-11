@@ -47,6 +47,10 @@ class NIDSTrainer(Executor):
         positional_encoding=None,
         client_id: str = None,
         checkpoint_dir: str = "checkpoints",
+        oversample_min_ratio: float = 0.05,
+        oversample_target_ratio: float = 0.3,
+        oversample_method: str = "borderline-1",
+        oversample_random_state: int = 42,
     ):
         super().__init__()
         self.data_dir = data_dir
@@ -71,6 +75,10 @@ class NIDSTrainer(Executor):
         self.positional_encoding = positional_encoding
         self.client_id = client_id
         self.checkpoint_dir = checkpoint_dir
+        self.oversample_min_ratio = oversample_min_ratio
+        self.oversample_target_ratio = oversample_target_ratio
+        self.oversample_method = oversample_method
+        self.oversample_random_state = oversample_random_state
 
         # Initialized lazily on first round
         self.model = None
@@ -112,6 +120,10 @@ class NIDSTrainer(Executor):
             fanout=self.fanout,
             client_id=self.client_id,
             shuffle=(self.positional_encoding is None),
+            oversample_min_ratio=self.oversample_min_ratio,
+            oversample_target_ratio=self.oversample_target_ratio,
+            oversample_method=self.oversample_method,
+            oversample_random_state=self.oversample_random_state,
         )
 
         self.model = GraphIDS(

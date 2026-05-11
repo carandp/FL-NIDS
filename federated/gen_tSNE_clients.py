@@ -1,4 +1,3 @@
-
 import sys
 import os
 from matplotlib.patches import Patch
@@ -18,6 +17,7 @@ if FED_CUSTOM_PATH not in sys.path:
 from utils.dataloaders import NetFlowDataset
 from graphids_model import GraphIDS
 
+
 def run_tsne(Z, seed=42):
     Z = StandardScaler().fit_transform(Z)
     return TSNE(
@@ -28,10 +28,14 @@ def run_tsne(Z, seed=42):
         random_state=seed
     ).fit_transform(Z)
 
+
 def plot_tsne_for_client(client_id):
     print(f"Processing t-SNE for {client_id}...")
+
     # 1) Load graph data for client (test split, federated)
-    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), f"../datasets/fed_clients/{client_id}"))
+    data_dir = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), f"../datasets/fed_clients/{client_id}"
+    ))
     dataset = NetFlowDataset(
         name="NF-CSE-CIC-IDS2018-v3",
         data_dir=data_dir,
@@ -50,8 +54,8 @@ def plot_tsne_for_client(client_id):
     model = GraphIDS(
         ndim_in=dataset.num_node_features,
         edim_in=dataset.num_edge_features,
-        edim_out=64, 
-        embed_dim=32, 
+        edim_out=64,
+        embed_dim=32,
         num_heads=4,
         num_layers=1,
         window_size=512,
@@ -62,7 +66,8 @@ def plot_tsne_for_client(client_id):
         mask_ratio=0.15,
     )
     ckpt_path = os.path.abspath(os.path.join(
-        os.path.dirname(__file__), f"../federated/poc_workspace/fl_nids/prod_00/{client_id}/checkpoints/best_global_model_{client_id}.pt"
+        os.path.dirname(__file__),
+        f"../federated/poc_workspace/fl_nids/prod_00/{client_id}/checkpoints/best_global_model_{client_id}.pt"
     ))
     ckpt = torch.load(ckpt_path, map_location=device)
     if "model_state_dict" in ckpt:
@@ -89,66 +94,83 @@ def plot_tsne_for_client(client_id):
             recon_embs.append(recon.detach().cpu())
             attacks.append(batch.edge_labels.detach().cpu())
 
-    if len(attacks) > 0:
-        y_attack = np.concatenate(attacks)
-    else:
-        y_attack = np.array([])
+    y_attack = np.concatenate(attacks) if len(attacks) > 0 else np.array([])
     H_edge = torch.cat(edge_embs, dim=0).numpy()
     H_rec = torch.cat(recon_embs, dim=0).numpy()
 
-    # 5) Downsample + balance BEFORE t-SNE
+    # 5) Separate classes — subsample ONLY benign, keep ALL attacks
     label_map = {0: "Benign", 1: "Attack"}
     y_names = np.array([label_map.get(int(v), str(v)) for v in y_attack])
 
-    # Downsample + Balance
-    max_per_class = 20000
-    indices = []
-    rng = np.random.default_rng(42)
-    for cls in np.unique(y_names):
-        cls_idx = np.where(y_names == cls)[0]
-        if len(cls_idx) > max_per_class:
-            cls_idx = rng.choice(cls_idx, max_per_class, replace=False)
-        indices.extend(cls_idx)
-    indices = np.array(indices)
-    H_edge = H_edge[indices]
-    H_rec = H_rec[indices]
-    y_names = y_names[indices]
+    benign_idx_all = np.where(y_names == "Benign")[0]
+    attack_idx_all = np.where(y_names == "Attack")[0]
 
-    # 6) t-SNE
-    Z_edge = run_tsne(H_edge)
-    Z_rec = run_tsne(H_rec)
+    max_benign = 10000  # tune this: lower = faster, higher = more faithful benign geometry
+    rng = np.random.default_rng(42)
+
+    if len(benign_idx_all) > max_benign:
+        benign_idx_sampled = rng.choice(benign_idx_all, max_benign, replace=False)
+    else:
+        benign_idx_sampled = benign_idx_all
+
+    print(f"  Benign sampled: {len(benign_idx_sampled):,} / {len(benign_idx_all):,} | Attacks (all): {len(attack_idx_all):,}")
+
+    # Combine: subsampled benign + ALL attacks
+    combined_idx = np.concatenate([benign_idx_sampled, attack_idx_all])
+    combined_labels = y_names[combined_idx]
+
+    # 6) t-SNE on combined set
+    print("  Running t-SNE on edge embeddings...")
+    Z_edge = run_tsne(H_edge[combined_idx])
+    print("  Running t-SNE on reconstructed embeddings...")
+    Z_rec = run_tsne(H_rec[combined_idx])
 
     # 7) Plot
-
     fig, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=120)
     plots = [
         (axes[0], Z_edge, "Edge Embeddings (t-SNE)"),
-        (axes[1], Z_rec, "Reconstructed Edge Embeddings (t-SNE)")
+        (axes[1], Z_rec,  "Reconstructed Edge Embeddings (t-SNE)"),
     ]
+
+    # Use robust axis limits so a few extreme points do not squash the main cluster.
+    def robust_limits(Z, low=0.05, high=99.95, pad=0.2):
+        x_low, x_high = np.percentile(Z[:, 0], [low, high])
+        y_low, y_high = np.percentile(Z[:, 1], [low, high])
+        x_pad = (x_high - x_low) * pad
+        y_pad = (y_high - y_low) * pad
+        return (x_low - x_pad, x_high + x_pad), (y_low - y_pad, y_high + y_pad)
+
     for ax, Z, title in plots:
-        benign_idx = y_names == "Benign"
-        attack_idx = y_names == "Attack"
-        attack_count = int(np.sum(attack_idx))
+        benign_mask = combined_labels == "Benign"
+        attack_mask = combined_labels == "Attack"
+        attack_count = int(np.sum(attack_mask))
+        benign_count = int(np.sum(benign_mask))
+
+        # Hexbin density for benign
         hb = ax.hexbin(
-            Z[benign_idx, 0],
-            Z[benign_idx, 1],
+            Z[benign_mask, 0],
+            Z[benign_mask, 1],
             gridsize=55,
             cmap="Blues",
             mincnt=1,
             alpha=0.65
         )
-        fig.colorbar(hb, ax=ax, label="Benign count")
+        fig.colorbar(hb, ax=ax, label=f"Benign count (n={benign_count:,})")
+
+        # Scatter all attack points
         ax.scatter(
-            Z[attack_idx, 0],
-            Z[attack_idx, 1],
+            Z[attack_mask, 0],
+            Z[attack_mask, 1],
             s=14,
             color="#ed8936",
             alpha=0.9,
-            label=f"Attack (n={attack_count})"
+            label=f"Attack (n={attack_count:,})"
         )
+
+        # KDE contours over benign
         try:
-            if np.sum(benign_idx) > 50:
-                xy = np.vstack([Z[benign_idx, 0], Z[benign_idx, 1]])
+            if np.sum(benign_mask) > 50:
+                xy = np.vstack([Z[benign_mask, 0], Z[benign_mask, 1]])
                 kde = gaussian_kde(xy)
                 xx, yy = np.meshgrid(
                     np.linspace(Z[:, 0].min(), Z[:, 0].max(), 150),
@@ -158,22 +180,32 @@ def plot_tsne_for_client(client_id):
                 ax.contour(xx, yy, zz, levels=6, colors="navy", alpha=0.4, linewidths=0.8)
         except Exception:
             pass
+
         ax.set_title(title)
         ax.set_xlabel("t-SNE dimension 1")
         ax.set_ylabel("t-SNE dimension 2")
         ax.grid(True, linestyle="--", alpha=0.25)
+
+        (xlim_low, xlim_high), (ylim_low, ylim_high) = robust_limits(Z)
+        ax.set_xlim(xlim_low, xlim_high)
+        ax.set_ylim(ylim_low, ylim_high)
+
         legend_elements = [
-            Patch(facecolor="#2b6cb0", edgecolor="none", alpha=0.65, label="Benign"),
-            Line2D([0], [0], marker='o', color='w', label=f"Attack (n={attack_count})",
-                markerfacecolor="#ed8936", markersize=8)
+            Patch(facecolor="#2b6cb0", edgecolor="none", alpha=0.65, label=f"Benign (n={benign_count:,}, subsampled)"),
+            Line2D([0], [0], marker='o', color='w', label=f"Attack (n={attack_count:,}, all)",
+                   markerfacecolor="#ed8936", markersize=8)
         ]
         ax.legend(handles=legend_elements, title="Class", loc="upper center")
+
+    plt.suptitle(f"t-SNE — {client_id}", fontsize=13, fontweight="bold", y=1.01)
     plt.tight_layout()
+
     out_path = os.path.join("tsne_plots", f"tSNE_{client_id}.png")
     os.makedirs("tsne_plots", exist_ok=True)
     plt.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"Saved t-SNE plot for {client_id} to {out_path}")
+    print(f"  Saved → {out_path}\n")
+
 
 if __name__ == "__main__":
     for client in ["client0", "client1", "client2"]:
