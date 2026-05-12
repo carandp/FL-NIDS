@@ -1,0 +1,69 @@
+
+=== client0 ===
+Node features: 49  |  Edge features: 49
+Loaded client model from: /home/carandp/FL-NIDS/federated_he/poc_workspace/fl_nids/prod_00/client0/checkpoints/best_global_model_client0.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.820495
+Evaluating on test set...
+
+Test macro F1-score : 0.9620
+Test PR-AUC         : 0.9224
+Prediction time     : 0.4318 s
+
+Run history (client0):
+    train_loss @-:......                                                                                           
+      val_loss @:.                                                                                                 
+    val_pr_auc @-.      ..:::::::::------======--------------------------=============+++++++******######%%%%%%%%%%
+  val_macro_f1 @=.    ...:-----------------==========---=-=-==--===============+++++++++++********######%%%%%%%%%%%
+
+Run summary:
+    train_loss 0.00056408
+      val_loss 0.000208804
+    val_pr_auc 0.861162
+  val_macro_f1 0.887567
+
+=== client1 ===
+Node features: 49  |  Edge features: 49
+Loaded client model from: /home/carandp/FL-NIDS/federated_he/poc_workspace/fl_nids/prod_00/client1/checkpoints/best_global_model_client1.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.003257
+Evaluating on test set...
+
+Test macro F1-score : 0.9975
+Test PR-AUC         : 0.9645
+Prediction time     : 0.3096 s
+
+Run history (client1):
+    train_loss @-:....                                                                                             
+      val_loss @:....                                                                                              
+    val_pr_auc =  =%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  val_macro_f1 +  =%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Run summary:
+    train_loss 7.62602e-06
+      val_loss 4.30967e-05
+    val_pr_auc 0.9988
+  val_macro_f1 0.99969
+
+=== client2 ===
+Node features: 49  |  Edge features: 49
+Loaded client model from: /home/carandp/FL-NIDS/federated_he/poc_workspace/fl_nids/prod_00/client2/checkpoints/best_global_model_client2.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.059567
+Evaluating on test set...
+
+Test macro F1-score : 0.8279
+Test PR-AUC         : 0.7557
+Prediction time     : 0.0582 s
+
+Run history (client2):
+    train_loss ....................................................................................................
+      val_loss @:.                                                                                                 
+    val_pr_auc  %@@@%@@%%%%%%%##########**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  val_macro_f1  %@@%%%%%%%%#*********************************************************************************++++++
+
+Run summary:
+    train_loss 0
+      val_loss 0.000432792
+    val_pr_auc 0.796101
+  val_macro_f1 0.805803
