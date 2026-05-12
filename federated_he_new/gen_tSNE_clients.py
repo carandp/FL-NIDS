@@ -4,6 +4,7 @@ from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 import numpy as np
 import torch
+import tenseal as ts
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
@@ -16,6 +17,57 @@ if FED_CUSTOM_PATH not in sys.path:
 
 from utils.dataloaders import NetFlowDataset
 from graphids_model import GraphIDS
+
+
+def find_he_context(model_path: str) -> str | None:
+    """Find a TenSEAL context that includes the secret key for decryption."""
+    script_dir = os.path.dirname(__file__)
+    candidates = [
+        os.path.join(script_dir, "poc_workspace", "fl_nids", "prod_00", "client0", "startup", "client_context.tenseal"),
+        os.path.join(script_dir, "poc_workspace", "fl_nids", "prod_00", "client1", "startup", "client_context.tenseal"),
+        os.path.join(script_dir, "poc_workspace", "fl_nids", "prod_00", "client2", "startup", "client_context.tenseal"),
+        os.path.join(os.path.dirname(model_path), "client_context.tenseal"),
+        os.path.join(os.path.dirname(model_path), "server_context.tenseal"),
+        os.path.join(os.path.dirname(model_path), "..", "startup", "server_context.tenseal"),
+    ]
+    for p in candidates:
+        p = os.path.abspath(p)
+        if os.path.isfile(p):
+            return p
+    return None
+
+
+def decode_he_state_dict(state_dict: dict, model: GraphIDS, context_path: str) -> dict:
+    """Decode HE-serialized bytes into tensors with expected parameter shapes."""
+    with open(context_path, "rb") as f:
+        ctx = ts.context_from(f.read())
+    try:
+        secret_key = ctx.secret_key()
+    except Exception as e:
+        raise RuntimeError(
+            f"TenSEAL context at '{context_path}' does not include a secret key; use client_context.tenseal."
+        ) from e
+
+    expected_state = model.state_dict()
+    decoded = {}
+    for name, value in state_dict.items():
+        if name not in expected_state:
+            continue
+        expected = expected_state[name]
+        if isinstance(value, bytes):
+            vec = ts.ckks_vector_from(ctx, value)
+            plain = vec.decrypt(secret_key=secret_key)
+            t = torch.tensor(plain, dtype=expected.dtype)
+        else:
+            t = torch.as_tensor(value, dtype=expected.dtype)
+
+        if t.numel() != expected.numel():
+            raise RuntimeError(
+                f"Decoded param '{name}' has {t.numel()} values, expected {expected.numel()}"
+            )
+        decoded[name] = t.reshape(expected.shape)
+
+    return decoded
 
 
 def run_tsne(Z, seed=42):
@@ -71,11 +123,22 @@ def plot_tsne_for_client(client_id):
     ))
     ckpt = torch.load(ckpt_path, map_location=device)
     if "model_state_dict" in ckpt:
-        model.load_state_dict(ckpt["model_state_dict"], strict=True)
+        state_dict = ckpt["model_state_dict"]
     elif "state_dict" in ckpt:
-        model.load_state_dict(ckpt["state_dict"], strict=True)
+        state_dict = ckpt["state_dict"]
     else:
-        model.load_state_dict(ckpt, strict=True)
+        state_dict = ckpt
+
+    if any(isinstance(v, bytes) for v in state_dict.values()):
+        context_path = find_he_context(ckpt_path)
+        if not context_path:
+            raise RuntimeError(
+                "Checkpoint appears HE-serialized (bytes), but no client_context.tenseal file was found."
+            )
+        print(f"Detected HE checkpoint bytes. Decoding with context: {context_path}")
+        state_dict = decode_he_state_dict(state_dict, model, context_path)
+
+    model.load_state_dict(state_dict, strict=True)
     model.to(device)
     model.eval()
 
