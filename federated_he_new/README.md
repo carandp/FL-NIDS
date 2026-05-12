@@ -31,13 +31,13 @@ files for encrypted aggregation.
 The first time (or after deleting `poc_workspace/`):
 
 ```bash
-NVFLARE_POC_WORKSPACE=/home/<user>/FL-NIDS/federated/poc_workspace uv run nvflare poc prepare -i ./project.yml
+NVFLARE_POC_WORKSPACE=/home/<user>/FL-NIDS/federated_he_new/poc_workspace uv run nvflare poc prepare -i ./project.yml
 ```
 
 Link job directory
 
 ```bash
-NVFLARE_POC_WORKSPACE=/home/<user>/FL-NIDS/federated/poc_workspace uv run nvflare poc prepare-jobs-dir -j ./jobs
+NVFLARE_POC_WORKSPACE=/home/<user>/FL-NIDS/federated_he_new/poc_workspace uv run nvflare poc prepare-jobs-dir -j ./jobs
 ```
 
 Then start the server, client, and admin console together:

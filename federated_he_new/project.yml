@@ -42,4 +42,11 @@ builders:
 
   - path: nvflare.lighter.impl.cert.CertBuilder
 
+  - path: nvflare.lighter.impl.he.HEBuilder
+    args:
+      poly_modulus_degree: 8192
+      coeff_mod_bit_sizes: [60, 40, 40]
+      scale_bits: 40
+      scheme: CKKS
+
   - path: nvflare.lighter.impl.signature.SignatureBuilder
