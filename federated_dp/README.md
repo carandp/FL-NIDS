@@ -1,7 +1,20 @@
 # Federated Learning Differencial Privacy — Quick Start Guide
 
-> **Prerequisites:** `uv` installed and the dataset available at `datasets/fed_clients/`. The fed_clients folder is generated with data_analysis/data.ipynb.
-
+> **Prerequisites:** `uv` installed and the dataset available at `../datasets/fed_clients/`. The fed_clients folder is generated with data_analysis/data.ipynb.
+> 
+> **Expected Data Structure:** 
+> ```
+> ../datasets/fed_clients/
+> ├── client0/
+> │   ├── client0.parquet
+> │   └── pyg_graph_data/
+> ├── client1/
+> │   ├── client1.parquet
+> │   └── pyg_graph_data/
+> └── client2/
+>     ├── client2.parquet
+>     └── pyg_graph_data/
+> ```
 ---
 
 ## 1. Change kernel and install dependencies (if needed)
