@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import sys
 import torch
@@ -51,6 +52,11 @@ class NIDSTrainer(Executor):
         oversample_target_ratio: float = 0.3,
         oversample_method: str = "borderline-1",
         oversample_random_state: int = 42,
+        dp_enabled: bool = True,
+        dp_clip_norm: float = 1.0,
+        dp_noise_multiplier: float = 1.0,
+        dp_delta: float = 1e-5,
+        dp_accountant_orders=None,
     ):
         super().__init__()
         self.data_dir = data_dir
@@ -79,12 +85,21 @@ class NIDSTrainer(Executor):
         self.oversample_target_ratio = oversample_target_ratio
         self.oversample_method = oversample_method
         self.oversample_random_state = oversample_random_state
+        self.dp_enabled = dp_enabled
+        self.dp_clip_norm = dp_clip_norm
+        self.dp_noise_multiplier = dp_noise_multiplier
+        self.dp_delta = dp_delta
+        self.dp_accountant_orders = dp_accountant_orders
 
         # Initialized lazily on first round
         self.model = None
         self.optimizer = None
         self.train_loader = None
         self.val_loader = None
+
+        self.dp_steps_total = 0
+        self.dp_dataset_size = None
+        self.dp_batch_size = None
 
         # Best-model tracking and per-round metrics across rounds
         self.best_val_pr_auc = 0.0
@@ -112,7 +127,8 @@ class NIDSTrainer(Executor):
             return
 
         self.log_info(fl_ctx, "Initializing model and data loaders...")
-
+        
+        # 1. Loaders FIRST — dp_dataset_size depends on this
         self.train_loader, self.val_loader, ndim_in, edim_in = get_loaders(
             data_dir=self.data_dir,
             dataset_name=self.dataset_name,
@@ -126,6 +142,7 @@ class NIDSTrainer(Executor):
             oversample_random_state=self.oversample_random_state,
         )
 
+        # 2. Model
         self.model = GraphIDS(
             ndim_in=ndim_in,
             edim_in=edim_in,
@@ -141,6 +158,7 @@ class NIDSTrainer(Executor):
             mask_ratio=self.mask_ratio,
         ).to(device)
 
+        # 3. Optimizer
         self.optimizer = torch.optim.AdamW(
             [
                 {"params": self.model.encoder.parameters(), "weight_decay": self.weight_decay},
@@ -148,6 +166,40 @@ class NIDSTrainer(Executor):
             ],
             lr=self.lr,
         )
+
+        # 4. DP setup — AFTER loaders exist so dataset size is known
+        if self.dp_enabled:
+            # Assign dataset size and raw batch size from the loader
+            self.dp_dataset_size = (
+                len(self.train_loader.dataset)
+                if hasattr(self.train_loader, "dataset")
+                else self.batch_size
+            )
+            self.dp_batch_size = getattr(self.train_loader, "batch_size", self.batch_size)
+
+            # Cap sample rate at 5% to prevent ε → ∞ on small datasets
+            MAX_SAMPLE_RATE = 0.05
+            max_safe_bs = max(1, int(self.dp_dataset_size * MAX_SAMPLE_RATE))
+            effective_bs = min(self.dp_batch_size, self.dp_dataset_size, max_safe_bs)
+            self.dp_batch_size = effective_bs
+
+            # Adapt window size so the AE inner loader is never empty.
+            # Rule: window ≤ 10% of expected embeddings per batch.
+            safe_window = max(8, min(self.window_size, effective_bs // 10))
+            if safe_window < self.window_size:
+                self.log_info(
+                    fl_ctx,
+                    f"window_size reduced {self.window_size} → {safe_window} "
+                    f"(dataset={self.dp_dataset_size}, effective_bs={effective_bs})",
+                )
+                self.window_size = safe_window
+
+            self.log_info(fl_ctx, (
+                f"DP config — dataset={self.dp_dataset_size}, "
+                f"effective_bs={self.dp_batch_size}, "
+                f"sample_rate={self.dp_batch_size / self.dp_dataset_size:.4f}, "
+                f"window={self.window_size}"
+            ))
 
         self.log_info(fl_ctx, f"Model ready — edim_in={edim_in}, device={device}")
 
@@ -176,7 +228,6 @@ class NIDSTrainer(Executor):
         _, val_errors, val_labels = validate(
             self.model, self.val_loader, self.ae_batch_size, self.window_size, device
         )
-        # Macro PR-AUC for binary classification: average of positive and negative class PR-AUCs
         pr_auc_pos = average_precision_score(val_labels.cpu(), val_errors.cpu())
         pr_auc_neg = average_precision_score(1 - val_labels.cpu(), 1 - val_errors.cpu())
         val_pr_auc = (pr_auc_pos + pr_auc_neg) / 2
@@ -213,60 +264,128 @@ class NIDSTrainer(Executor):
         )
 
         total_train_loss = 0.0
+        dp_step_count = 0
+        dp_grad_norm_sum = 0.0
+        dp_clip_coef_sum = 0.0
+
         for epoch in range(self.local_epochs):
             if abort_signal.triggered:
                 return make_reply(ReturnCode.TASK_ABORTED)
-            epoch_loss = self._run_epoch(abort_signal)
+            epoch_loss, epoch_dp_steps, epoch_grad_norm, epoch_clip_coef = self._run_epoch(
+                abort_signal
+            )
             total_train_loss += epoch_loss
+            dp_step_count += epoch_dp_steps
+            dp_grad_norm_sum += epoch_grad_norm
+            dp_clip_coef_sum += epoch_clip_coef
             self.log_info(
                 fl_ctx,
                 f"  Epoch {epoch + 1}/{self.local_epochs} — loss: {epoch_loss:.6f}",
             )
         total_train_loss /= max(self.local_epochs, 1)
 
-        # Validate locally-trained model and print round summary (mirrors centralized postfix)
+        # --- 4. DP accounting ---
+        if self.dp_enabled:
+            self.dp_steps_total += dp_step_count
+
+            dp_sample_rate = (
+                float(self.dp_batch_size) / float(self.dp_dataset_size)
+                if self.dp_dataset_size
+                else 1.0
+            )
+            dp_sample_rate = max(0.0, min(dp_sample_rate, 1.0))
+
+            # Keep epsilon as a raw float throughout — only stringify for JSON
+            dp_epsilon_raw, dp_best_order = self._compute_privacy_epsilon(
+                steps=self.dp_steps_total,
+                sample_rate=dp_sample_rate,
+            )
+
+            if not math.isfinite(dp_epsilon_raw):
+                self.log_warning(fl_ctx, (
+                    f"DP epsilon is non-finite ({dp_epsilon_raw}) at "
+                    f"step={self.dp_steps_total}, "
+                    f"sample_rate={dp_sample_rate:.6f}, "
+                    f"noise_multiplier={self.dp_noise_multiplier}. "
+                    f"Dataset may be too small for the current batch size."
+                ))
+
+            dp_epsilon = dp_epsilon_raw  # float (may be inf)
+            dp_epsilon_json = dp_epsilon if math.isfinite(dp_epsilon) else "inf"  # JSON-safe
+
+            dp_grad_norm_mean = dp_grad_norm_sum / max(dp_step_count, 1)
+            dp_clip_coef_mean = dp_clip_coef_sum / max(dp_step_count, 1)
+
+            eps_display = f"{dp_epsilon:.4f}" if math.isfinite(dp_epsilon) else "inf"
+            self.log_info(fl_ctx, (
+                f"DP-SGD: steps={self.dp_steps_total}, eps={eps_display}, "
+                f"delta={self.dp_delta:.2e}, noise={self.dp_noise_multiplier:.4f}, "
+                f"clip={self.dp_clip_norm:.4f}, sample_rate={dp_sample_rate:.6f}"
+            ))
+        else:
+            dp_epsilon_json = None
+            dp_best_order = None
+            dp_sample_rate = None
+            dp_grad_norm_mean = None
+            dp_clip_coef_mean = None
+
+        # --- 5. Validate locally-trained model ---
         val_loss_local, val_errors_local, val_labels_local = validate(
             self.model, self.val_loader, self.ae_batch_size, self.window_size, device
         )
-        # Macro PR-AUC for binary classification: average of positive and negative class PR-AUCs
         pr_auc_pos_local = average_precision_score(val_labels_local.cpu(), val_errors_local.cpu())
         pr_auc_neg_local = average_precision_score(1 - val_labels_local.cpu(), 1 - val_errors_local.cpu())
         val_pr_auc_local = (pr_auc_pos_local + pr_auc_neg_local) / 2
         threshold_local = find_threshold(val_errors_local, val_labels_local, method="supervised")
         val_pred_local = (val_errors_local > threshold_local).int()
         val_f1_local = f1_score(val_labels_local.cpu(), val_pred_local.cpu(), average="macro", zero_division=0)
+
         separator = "-" * 80
         self.log_info(fl_ctx, separator)
-        self.log_info(
-            fl_ctx,
+        self.log_info(fl_ctx, (
             f"Round {current_round} complete — "
             f"train_loss={total_train_loss:.6f}, val_loss={val_loss_local:.6f}, "
-            f"val_pr_auc={val_pr_auc_local:.4f}, val_macro_f1={val_f1_local:.4f}",
-        )
+            f"val_pr_auc={val_pr_auc_local:.4f}, val_macro_f1={val_f1_local:.4f}"
+        ))
         self.log_info(fl_ctx, separator)
 
-        # Persist per-round metrics for post-training reporting
+        # --- 6. Persist per-round metrics ---
         self.metrics_history.append({
             "round": current_round,
             "train_loss": total_train_loss,
             "val_loss": val_loss_local,
             "val_pr_auc": val_pr_auc_local,
             "val_macro_f1": val_f1_local,
+            "dp_enabled": self.dp_enabled,
+            "dp_epsilon": dp_epsilon_json,
+            "dp_delta": self.dp_delta if self.dp_enabled else None,
+            "dp_noise_multiplier": self.dp_noise_multiplier if self.dp_enabled else None,
+            "dp_clip_norm": self.dp_clip_norm if self.dp_enabled else None,
+            "dp_sample_rate": dp_sample_rate,
+            "dp_steps_total": self.dp_steps_total if self.dp_enabled else None,
+            "dp_steps_round": dp_step_count if self.dp_enabled else None,
+            "dp_best_order": dp_best_order,
+            "dp_grad_norm": dp_grad_norm_mean,
+            "dp_clip_coef": dp_clip_coef_mean,
         })
         os.makedirs(self.checkpoint_dir, exist_ok=True)
         metrics_path = os.path.join(self.checkpoint_dir, f"metrics_history_{site_name}.json")
         with open(metrics_path, "w") as _f:
             json.dump(self.metrics_history, _f, indent=2)
 
-        # --- 4. Compute weight diff and convert to numpy for DXO ---
+        # --- 7. Compute weight diff and convert to numpy for DXO ---
         local_weights = self.model.state_dict()
         weight_diff = {
             k: (local_weights[k].cpu() - global_weights[k]).numpy()
             for k in local_weights
         }
 
-        # --- 5. Return as DXO (stable across all NVFlare versions) ---
-        num_samples = len(self.train_loader.dataset) if hasattr(self.train_loader, "dataset") else 1
+        # --- 8. Return as DXO ---
+        num_samples = (
+            len(self.train_loader.dataset)
+            if hasattr(self.train_loader, "dataset")
+            else 1
+        )
         out_dxo = DXO(
             data_kind=DataKind.WEIGHT_DIFF,
             data=weight_diff,
@@ -275,13 +394,16 @@ class NIDSTrainer(Executor):
         return out_dxo.to_shareable()
 
     # ------------------------------------------------------------------ #
-    # One full epoch — mirrors centralized train_encoder exactly           #
+    # One full epoch                                                        #
     # ------------------------------------------------------------------ #
-    def _run_epoch(self, abort_signal: Signal) -> float:
+    def _run_epoch(self, abort_signal: Signal) -> tuple[float, int, float, float]:
         self.model.train()
         criterion = nn.MSELoss(reduction="none")
         step = int(self.window_size * self.step_percent)
         total_loss = 0.0
+        dp_step_count = 0
+        dp_grad_norm_sum = 0.0
+        dp_clip_coef_sum = 0.0
 
         for batch in self.train_loader:
             if abort_signal.triggered:
@@ -298,36 +420,105 @@ class NIDSTrainer(Executor):
                 batch.num_nodes,
             )
 
-            # Sliding window AE loader (identical to centralized)
-            ae_loader = DataLoader(
-                SequentialDataset(
-                    train_emb,
-                    window=self.window_size,
-                    step=step,
-                    device=device,
-                ),
-                batch_size=self.ae_batch_size,
-                collate_fn=collate_fn,
-            )
-
-            # Accumulate loss, single backward per GNN batch
             accumulated_loss = torch.tensor(0.0, device=device)
             seq_count = 0
 
-            for ae_batch, mask in ae_loader:
-                outputs = self.model.transformer(ae_batch, mask)
-                # No detach on target — matches centralized exactly
-                loss = criterion(outputs, ae_batch)
-                loss = torch.sum(loss * mask) / torch.sum(mask)
+            if train_emb.shape[0] < self.window_size:
+                # Too few embeddings for windowed AE — train on full sequence directly
+                outputs = self.model.transformer(train_emb.unsqueeze(0), None)
+                loss = nn.MSELoss()(outputs.squeeze(0), train_emb)
                 accumulated_loss += loss
                 seq_count += 1
+            else:
+                # Normal windowed AE path
+                ae_loader = DataLoader(
+                    SequentialDataset(
+                        train_emb,
+                        window=self.window_size,
+                        step=step,
+                        device=device,
+                    ),
+                    batch_size=self.ae_batch_size,
+                    collate_fn=collate_fn,
+                )
+                for ae_batch, mask in ae_loader:
+                    outputs = self.model.transformer(ae_batch, mask)
+                    loss = criterion(outputs, ae_batch)
+                    loss = torch.sum(loss * mask) / torch.sum(mask)
+                    accumulated_loss += loss
+                    seq_count += 1
 
             if seq_count > 0:
                 mean_loss = accumulated_loss / seq_count
                 total_loss += mean_loss.item()
                 mean_loss.backward()
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                if self.dp_enabled:
+                    grad_norm, clip_coef = self._dp_clip_and_add_noise()
+                    dp_step_count += 1
+                    dp_grad_norm_sum += grad_norm
+                    dp_clip_coef_sum += clip_coef
+                else:
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
                 self.optimizer.step()
                 self.optimizer.zero_grad()
 
-        return total_loss / max(len(self.train_loader), 1)
+        return (
+            total_loss / max(len(self.train_loader), 1),
+            dp_step_count,
+            dp_grad_norm_sum,
+            dp_clip_coef_sum,
+        )
+
+    # ------------------------------------------------------------------ #
+    # DP: gradient clipping + noise injection                              #
+    # ------------------------------------------------------------------ #
+    def _dp_clip_and_add_noise(self) -> tuple[float, float]:
+        params = [p for p in self.model.parameters() if p.grad is not None]
+        if not params:
+            return 0.0, 1.0
+
+        total_norm = torch.norm(
+            torch.stack([p.grad.detach().norm(2) for p in params]), 2
+        )
+        clip_coef = float(self.dp_clip_norm / (total_norm + 1e-6))
+        if clip_coef < 1.0:
+            for p in params:
+                p.grad.mul_(clip_coef)
+
+        if self.dp_noise_multiplier > 0:
+            batch_divisor = max(float(self.dp_batch_size or 1), 1.0)
+            noise_std = self.dp_noise_multiplier * self.dp_clip_norm / batch_divisor
+            for p in params:
+                noise = torch.normal(
+                    mean=0.0,
+                    std=noise_std,
+                    size=p.grad.shape,
+                    device=p.grad.device,
+                )
+                p.grad.add_(noise)
+
+        return float(total_norm.item()), min(clip_coef, 1.0)
+
+    # ------------------------------------------------------------------ #
+    # DP: RDP-based epsilon accounting                                     #
+    # ------------------------------------------------------------------ #
+    def _compute_privacy_epsilon(self, steps: int, sample_rate: float) -> tuple[float, float | None]:
+        if self.dp_noise_multiplier <= 0 or steps <= 0 or sample_rate <= 0:
+            return 0.0, None
+
+        orders = self.dp_accountant_orders
+        if orders is None:
+            orders = [1.25, 1.5, 2, 3, 5, 10, 20, 50, 100]
+
+        rdp = []
+        for order in orders:
+            rdp.append(
+                steps * (sample_rate ** 2) * order / (2 * (self.dp_noise_multiplier ** 2))
+            )
+
+        epsilons = [
+            rdp_i + math.log(1.0 / self.dp_delta) / (order - 1)
+            for rdp_i, order in zip(rdp, orders)
+        ]
+        min_idx = int(min(range(len(epsilons)), key=epsilons.__getitem__))
+        return float(epsilons[min_idx]), float(orders[min_idx])

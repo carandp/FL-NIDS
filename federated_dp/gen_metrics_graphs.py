@@ -19,8 +19,14 @@ def plot_metrics_for_client(client_id):
     val_loss = [m["val_loss"] for m in metrics]
     pr_auc = [m["val_pr_auc"] for m in metrics]
     macro_f1 = [m["val_macro_f1"] for m in metrics]
+    dp_eps = [m.get("dp_epsilon") for m in metrics]
+    has_dp = any(eps is not None for eps in dp_eps)
 
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5), dpi=120)
+    if has_dp:
+        fig, axes = plt.subplots(2, 2, figsize=(18, 10), dpi=120)
+        axes = axes.flatten()
+    else:
+        fig, axes = plt.subplots(1, 3, figsize=(18, 5), dpi=120)
     fig.suptitle(f"Metrics for {client_id}", fontsize=16)
 
     # Loss plot
@@ -47,6 +53,14 @@ def plot_metrics_for_client(client_id):
     axes[2].set_ylabel("Macro F1")
     axes[2].legend()
     axes[2].grid(True, linestyle="--", alpha=0.5)
+
+    if has_dp:
+        axes[3].plot(rounds, dp_eps, label="DP Epsilon", color="tab:red", marker='o')
+        axes[3].set_title("DP Epsilon over Rounds")
+        axes[3].set_xlabel("Round")
+        axes[3].set_ylabel("Epsilon")
+        axes[3].legend()
+        axes[3].grid(True, linestyle="--", alpha=0.5)
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     out_path = os.path.join(os.getcwd(), "metrics_plots", f"metrics_{client_id}.png")

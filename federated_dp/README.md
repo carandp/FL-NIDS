@@ -20,7 +20,7 @@
 ## 1. Change kernel and install dependencies (if needed)
 
 ```bash
-cd federated/
+cd federated_dp/
 uv sync
 source .venv/bin/activate
 ```
