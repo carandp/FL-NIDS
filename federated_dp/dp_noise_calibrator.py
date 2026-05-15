@@ -6,7 +6,7 @@ noise_multiplier that keeps all three clients within budget after 100 rounds.
 
 Usage
 -----
-    python dp_noise_calibrator.py
+    python dp_noise_calibrator.py --target-epsilon 10.0
 
 Outputs a table like:
 
@@ -18,11 +18,12 @@ The binding client is always client_3 (smallest n, highest q).
 """
 from __future__ import annotations
 
+import argparse
 import sys
 from dataclasses import dataclass
 from typing import List
 
-from rdp_accountant import RDPAccountant
+from jobs.nids_fedavg.app.custom.rdp_accountant import RDPAccountant
 
 
 @dataclass
@@ -129,12 +130,23 @@ CLIENTS = [
 ]
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Find the minimum noise multiplier that meets a target epsilon.",
+    )
+    parser.add_argument(
+        "--target-epsilon",
+        type=float,
+        default=10.0,
+        help="Target epsilon for the privacy budget (default: 10.0).",
+    )
+    args = parser.parse_args()
+
     recommended_sigma = calibrate(
         clients=CLIENTS,
-        target_epsilon=10.0,
+        target_epsilon=args.target_epsilon,
         target_delta=1e-5,
         num_rounds=100,
-        sigma_range=(0.5, 5.0),
+        sigma_range=(0.3, 5.0),
         sigma_step=0.05,
         verbose=True,
     )

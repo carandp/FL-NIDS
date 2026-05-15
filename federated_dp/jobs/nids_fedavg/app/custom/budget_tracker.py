@@ -95,15 +95,17 @@ class BudgetTracker:
     # Core methods called by the DP filter
     # ------------------------------------------------------------------
 
-    def account_round(self, current_round: int) -> float:
+    def account_round(self, current_round: Optional[int] = None) -> tuple[float, int]:
         """
         Step the accountant for one FL round and persist state.
 
         Returns
         -------
-        float
-            Current ε after this round.
+        (float, int)
+            Current ε after this round, and the round number used.
         """
+        if current_round is None:
+            current_round = self._snapshot.round_num + 1
         self._accountant.step(
             noise_multiplier=self.noise_multiplier,
             sample_rate=self.sample_rate,
@@ -139,7 +141,7 @@ class BudgetTracker:
                 eps,
                 self.target_epsilon,
             )
-        return eps
+        return eps, current_round
 
     def is_exhausted(self) -> bool:
         return self._snapshot.budget_exhausted

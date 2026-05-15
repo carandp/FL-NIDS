@@ -112,7 +112,7 @@ class DPGaussianFilter(Filter):
 
     def process(self, shareable: Shareable, fl_ctx: FLContext) -> Shareable:
         client_id = fl_ctx.get_identity_name()
-        current_round = fl_ctx.get_prop("current_round", default=0)
+        current_round = None
 
         tracker = self._get_tracker(client_id)
 
@@ -159,7 +159,7 @@ class DPGaussianFilter(Filter):
         dxo.data = self._unflatten(flat, shapes, keys)
 
         # ── Step 4: account for privacy cost this round ──
-        eps = tracker.account_round(current_round)
+        eps, current_round = tracker.account_round(current_round)
 
         # Attach ε metadata so the server/researcher can log it
         dxo.set_meta_prop("dp_epsilon",          round(eps, 6))

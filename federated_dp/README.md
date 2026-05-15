@@ -27,6 +27,18 @@ source .venv/bin/activate
 
 ---
 
+## 1.1 Privacy budget setup
+
+To obtain the desired noise for a expected privacy budget run:
+
+```bash
+uv run python dp_noise_calibrator.py --target-epsilon 50.0
+```
+
+Edit the `config_fed_client.template.json` accordingly.
+
+---
+
 ## 2. Setup
 
 ```bash
