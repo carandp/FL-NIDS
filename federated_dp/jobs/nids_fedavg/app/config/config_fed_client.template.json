@@ -43,8 +43,7 @@
             "clip_norm": 1.0,
             "noise_multiplier": 0.75,
             "target_epsilon": 10.0,
-            "target_delta": 1e-5,
-            "budget_dir": "/tmp/nvflare_dp_budget"
+            "target_delta": 1e-5
           }
         }
       ]

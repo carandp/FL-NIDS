@@ -8,7 +8,7 @@ What it does
 3. L2-clips the vector to `clip_norm`.
 4. Adds isotropic Gaussian noise  N(0, (noise_multiplier * clip_norm)^2 I).
 5. Reconstructs the original tensor structure.
-6. Accounts for the privacy cost of this round and saves the budget to disk.
+6. Accounts for the privacy cost of this round and saves privacy history to disk.
 7. Returns an empty Shareable if the privacy budget is exhausted.
 
 Configuration (per client in config_fed_client.json)
@@ -21,10 +21,9 @@ Configuration (per client in config_fed_client.json)
     "noise_multiplier": 1.1,
     "target_epsilon":   10.0,
     "target_delta":     1e-5,
-    "dataset_size":     770415,
-    "batch_size":       32,
-    "local_epochs":     2,
-    "budget_dir":       "/tmp/nvflare_dp_budget"
+        "dataset_size":     770415,
+        "batch_size":       32,
+        "local_epochs":     2
   }
 }
 
@@ -41,6 +40,7 @@ For a desired (ε, δ) budget over T=100 rounds, use dp_noise_calibrator.py
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 from typing import Optional
@@ -82,7 +82,7 @@ class DPGaussianFilter(Filter):
         dataset_size:     int   = 10_000,
         batch_size:       int   = 32,
         local_epochs:     int   = 2,
-        budget_dir:       str   = "/tmp/nvflare_dp_budget",
+        checkpoint_dir:   str   = "checkpoints",
     ) -> None:
         super().__init__()
 
@@ -100,10 +100,11 @@ class DPGaussianFilter(Filter):
         self.dataset_size     = dataset_size
         self.batch_size       = batch_size
         self.local_epochs     = local_epochs
-        self.budget_dir       = budget_dir
+        self.checkpoint_dir   = checkpoint_dir
 
         # Tracker is created lazily (needs client_id from fl_ctx)
         self._tracker: Optional[BudgetTracker] = None
+        self._privacy_history: list = []
 
     # ------------------------------------------------------------------
     # NVFlare Filter interface
@@ -168,6 +169,22 @@ class DPGaussianFilter(Filter):
         dxo.set_meta_prop("dp_original_norm",    round(original_norm, 6))
         dxo.set_meta_prop("dp_budget_remaining", round(tracker.remaining_budget(), 6))
 
+        # Persist per-round privacy metrics (mirrors nids_trainer history style)
+        self._privacy_history.append(
+            {
+                "round": current_round,
+                "epsilon": round(eps, 6),
+                "delta": self.target_delta,
+                "clip_norm": self.clip_norm,
+                "noise_multiplier": self.noise_multiplier,
+                "budget_exhausted": tracker.is_exhausted(),
+            }
+        )
+        os.makedirs(self.checkpoint_dir, exist_ok=True)
+        history_path = os.path.join(self.checkpoint_dir, f"privacy_history_{client_id}.json")
+        with open(history_path, "w") as history_file:
+            json.dump(self._privacy_history, history_file, indent=2)
+
         # ── Step 5: abort if this round just exhausted the budget ──
         if tracker.is_exhausted():
             logger.warning(
@@ -196,7 +213,7 @@ class DPGaussianFilter(Filter):
                     "[DP/%s] No dataset_size override found; using config value=%d",
                     client_id, self.dataset_size,
                 )
-            budget_file = os.path.join(self.budget_dir, f"{client_id}_budget.json")
+            budget_file = os.path.join(self.checkpoint_dir, f"dp_budget_{client_id}.json")
             self._tracker = BudgetTracker(
                 client_id=client_id,
                 budget_file=budget_file,
