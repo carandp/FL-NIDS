@@ -1,0 +1,11 @@
+Node features: 49  |  Edge features: 49
+Loaded FL model from: jobs/112580a1-9435-4e38-a62b-5658ebd91222/workspace/app_server/FL_global_model.pt
+Computing validation errors to derive threshold...
+Threshold (supervised): 0.000000
+Evaluating on test set...
+
+Test macro F1-score : 0.4188
+Test PR-AUC         : 0.2795
+Prediction time     : 0.5680 s
+
+Run history (client0):
