@@ -111,7 +111,7 @@ class RDPAccountant:
     Usage
     -----
     acc = RDPAccountant()
-    acc.step(noise_multiplier=1.1, sample_rate=0.003, num_steps=686)
+    acc.step(noise_multiplier=1.1, clip_norm=1.0, sample_rate=0.003, num_steps=686)
     eps = acc.get_epsilon(delta=1e-5)
     """
 
@@ -127,7 +127,8 @@ class RDPAccountant:
         self,
         noise_multiplier: float,
         sample_rate: float,
-        num_steps: int = 1,
+        clip_norm: float,
+        num_steps: int = 1
     ) -> None:
         """
         Account for `num_steps` applications of the (q, sigma) Gaussian mechanism.
@@ -136,6 +137,8 @@ class RDPAccountant:
         ----------
         noise_multiplier : float
             Ratio sigma / clip_norm (the "σ" in the DP literature).
+        clip_norm : float
+            L2 clipping bound C.
         sample_rate : float
             Poisson sampling probability q = batch_size / dataset_size.
         num_steps : int
@@ -145,7 +148,10 @@ class RDPAccountant:
             raise ValueError("noise_multiplier must be positive")
         if not (0 < sample_rate <= 1):
             raise ValueError("sample_rate must be in (0, 1]")
-        self._rdp += num_steps * _rdp_one_step(noise_multiplier, sample_rate)
+        if clip_norm <= 0:
+            raise ValueError("clip_norm must be positive")
+        sigma_actual = noise_multiplier * clip_norm
+        self._rdp += num_steps * _rdp_one_step(sigma_actual, sample_rate)
         self._total_steps += num_steps
 
     def get_epsilon(self, delta: float = 1e-5) -> float:

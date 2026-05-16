@@ -109,7 +109,8 @@ class BudgetTracker:
         self._accountant.step(
             noise_multiplier=self.noise_multiplier,
             sample_rate=self.sample_rate,
-            num_steps=self.steps_per_round,
+            clip_norm=self.clip_norm,
+            num_steps=self.steps_per_round
         )
         eps = self._accountant.get_epsilon(self.target_delta)
         exhausted = eps >= self.target_epsilon

@@ -138,18 +138,25 @@ class DPGaussianFilter(Filter):
 
         weight_diff: dict = dxo.data
 
-        # ── Step 1: clip ──
+        # ── Step 1: clip (skip if update is zero) ──
         flat, shapes, keys = self._flatten(weight_diff)
         original_norm = float(np.linalg.norm(flat))
-        if original_norm > self.clip_norm:
-            flat = flat * (self.clip_norm / original_norm)
-        clipped_norm = float(np.linalg.norm(flat))
+        zero_update = (flat.size == 0) or (original_norm == 0.0)
 
-        # ── Step 2: add Gaussian noise ──
-        noise_std = tracker.noise_std()
-        flat = flat + np.random.normal(0.0, noise_std, flat.shape).astype(flat.dtype)
+        if zero_update:
+            clipped_norm = original_norm
+            noise_std = tracker.noise_std()
+            noisy_norm = original_norm
+        else:
+            if original_norm > self.clip_norm:
+                flat = flat * (self.clip_norm / original_norm)
+            clipped_norm = float(np.linalg.norm(flat))
 
-        noisy_norm = float(np.linalg.norm(flat))
+            # ── Step 2: add Gaussian noise ──
+            noise_std = tracker.noise_std()
+            flat = flat + np.random.normal(0.0, noise_std, flat.shape).astype(flat.dtype)
+
+            noisy_norm = float(np.linalg.norm(flat))
         logger.debug(
             "[DP/%s] round=%d  ||Δw||=%.4f  clipped=%.4f  noisy=%.4f  noise_std=%.4f",
             client_id, current_round, original_norm, clipped_norm, noisy_norm, noise_std,

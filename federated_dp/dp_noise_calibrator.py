@@ -45,6 +45,7 @@ class ClientSpec:
 def simulate_epsilon(
     spec: ClientSpec,
     noise_multiplier: float,
+    clip_norm: float,
     num_rounds: int,
     delta: float,
 ) -> float:
@@ -53,6 +54,7 @@ def simulate_epsilon(
         acc.step(
             noise_multiplier=noise_multiplier,
             sample_rate=spec.sample_rate,
+            clip_norm=clip_norm,
             num_steps=spec.steps_per_round,
         )
     return acc.get_epsilon(delta)
@@ -65,6 +67,7 @@ def calibrate(
     num_rounds:     int   = 100,
     sigma_range:    tuple = (0.5, 3.0),
     sigma_step:     float = 0.05,
+    clip_norm:      float = 2.0,
     verbose:        bool  = True,
 ) -> float:
     """
@@ -90,7 +93,7 @@ def calibrate(
         results = {}
         all_ok  = True
         for spec in clients:
-            eps = simulate_epsilon(spec, sigma, num_rounds, target_delta)
+            eps = simulate_epsilon(spec, sigma, clip_norm, num_rounds, target_delta)
             results[spec.name] = eps
             if eps > target_epsilon:
                 all_ok = False
@@ -146,8 +149,9 @@ if __name__ == "__main__":
         target_epsilon=args.target_epsilon,
         target_delta=1e-5,
         num_rounds=100,
-        sigma_range=(0.3, 5.0),
-        sigma_step=0.05,
+        sigma_range=(0.15, 5.0),
+        sigma_step=0.01,
+        clip_norm=2.0,
         verbose=True,
     )
     sys.exit(0 if recommended_sigma < float("inf") else 1)
