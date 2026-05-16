@@ -157,7 +157,8 @@ def main():
     Z_rec = run_tsne(H_rec[combined_idx])
 
     # 6) Plot
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=120)
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=300)
+    plt.rcParams.update({"font.size": 14})
     plots = [
         (axes[0], Z_edge, "Edge Embeddings (t-SNE)"),
         (axes[1], Z_rec,  "Reconstructed Edge Embeddings (t-SNE)"),
@@ -186,7 +187,7 @@ def main():
             mincnt=1,
             alpha=0.65
         )
-        fig.colorbar(hb, ax=ax, label=f"Benign count (n={benign_count:,})")
+        fig.colorbar(hb, ax=ax, label=f"Benign")
 
         # Scatter all attack points
         ax.scatter(
@@ -195,7 +196,7 @@ def main():
             s=14,
             color="#ed8936",
             alpha=0.9,
-            label=f"Attack (n={attack_count:,})"
+            label=f"`Malicious"
         )
 
         # KDE contours over benign
@@ -222,18 +223,17 @@ def main():
         ax.set_ylim(ylim_low, ylim_high)
 
         legend_elements = [
-            Patch(facecolor="#2b6cb0", edgecolor="none", alpha=0.65, label=f"Benign (n={benign_count:,}, subsampled)"),
-            Line2D([0], [0], marker='o', color='w', label=f"Attack (n={attack_count:,}, all)",
+            Patch(facecolor="#2b6cb0", edgecolor="none", alpha=0.65, label=f"Benign"),
+            Line2D([0], [0], marker='o', color='w', label=f"Malicious",
                    markerfacecolor="#ed8936", markersize=8)
         ]
-        ax.legend(handles=legend_elements, title="Class", loc="upper center")
-
-    plt.suptitle(f"t-SNE — Server (job: {job_id})", fontsize=13, fontweight="bold", y=1.01)
+        ax.legend(handles=legend_elements, title="Class", loc="upper right")
+        
     plt.tight_layout()
 
     out_path = os.path.join("tsne_plots", f"tSNE_server_{job_id}.png")
     os.makedirs("tsne_plots", exist_ok=True)
-    plt.savefig(out_path, dpi=150, bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved t-SNE plot for server → {out_path}")
 

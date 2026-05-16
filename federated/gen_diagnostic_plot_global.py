@@ -132,6 +132,7 @@ def plot_hist_and_pr(
     print(f"AP(-errors): {ap_inverted:.6f}")
 
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+    plt.rcParams.update({"font.size": 14})
 
     axes[0].hist(neg, bins=2500, alpha=0.7, label="Benign", color="#4E79A7")
     axes[0].hist(pos, bins=500, alpha=0.7, label="Malicious", color="#E15759")
@@ -142,7 +143,7 @@ def plot_hist_and_pr(
     axes[0].legend()
 
     axes[1].plot(recall, precision, color="#59A14F")
-    axes[1].set_title(f"PR curve (AP={ap:.4f})")
+    axes[1].set_title(f"PR curve (AUC={ap:.4f})")
     axes[1].set_xlabel("Recall")
     axes[1].set_ylabel("Precision")
     axes[1].set_xlim(0, 1)

@@ -73,7 +73,6 @@ def plot_metrics_all_clients(client_ids):
         return
 
     fig, axes = plt.subplots(3, 1, figsize=(8, 10), dpi=300)
-    fig.suptitle("Metrics Across Clients", fontsize=16, y=0.93)
 
     base_colors = plt.cm.tab10.colors
     client_order = list(client_metrics.keys())
@@ -96,14 +95,12 @@ def plot_metrics_all_clients(client_ids):
         axes[2].plot(rounds, macro_f1, label=client_id, color=val_color, marker='o')
 
     axes[0].set_title("Loss over Rounds")
-    axes[0].set_xlabel("Round")
     axes[0].set_ylabel("Loss")
     axes[0].set_yscale("log")
     axes[0].legend(ncol=2, fontsize=9)
     axes[0].grid(True, linestyle="--", alpha=0.5)
 
     axes[1].set_title("PR_AUC over Rounds")
-    axes[1].set_xlabel("Round")
     axes[1].set_ylabel("PR_AUC")
     axes[1].legend(fontsize=9)
     axes[1].grid(True, linestyle="--", alpha=0.5)

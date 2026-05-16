@@ -126,14 +126,15 @@ def plot_tsne_for_client(client_id):
     Z_rec = run_tsne(H_rec[combined_idx])
 
     # 7) Plot
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=120)
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=300)
+    plt.rcParams.update({"font.size": 14})
     plots = [
         (axes[0], Z_edge, "Edge Embeddings (t-SNE)"),
         (axes[1], Z_rec,  "Reconstructed Edge Embeddings (t-SNE)"),
     ]
 
     # Use robust axis limits so a few extreme points do not squash the main cluster.
-    def robust_limits(Z, low=0.05, high=99.95, pad=0.2):
+    def robust_limits(Z, low=0.08, high=99.92, pad=0.1):
         x_low, x_high = np.percentile(Z[:, 0], [low, high])
         y_low, y_high = np.percentile(Z[:, 1], [low, high])
         x_pad = (x_high - x_low) * pad
@@ -155,7 +156,7 @@ def plot_tsne_for_client(client_id):
             mincnt=1,
             alpha=0.65
         )
-        fig.colorbar(hb, ax=ax, label=f"Benign count (n={benign_count:,})")
+        fig.colorbar(hb, ax=ax, label=f"Benign")
 
         # Scatter all attack points
         ax.scatter(
@@ -164,7 +165,7 @@ def plot_tsne_for_client(client_id):
             s=14,
             color="#ed8936",
             alpha=0.9,
-            label=f"Attack (n={attack_count:,})"
+            label=f"Malicious"
         )
 
         # KDE contours over benign
@@ -191,18 +192,16 @@ def plot_tsne_for_client(client_id):
         ax.set_ylim(ylim_low, ylim_high)
 
         legend_elements = [
-            Patch(facecolor="#2b6cb0", edgecolor="none", alpha=0.65, label=f"Benign (n={benign_count:,}, subsampled)"),
-            Line2D([0], [0], marker='o', color='w', label=f"Attack (n={attack_count:,}, all)",
+            Patch(facecolor="#2b6cb0", edgecolor="none", alpha=0.65, label=f"Benign"),
+            Line2D([0], [0], marker='o', color='w', label=f"Malicious",
                    markerfacecolor="#ed8936", markersize=8)
         ]
-        ax.legend(handles=legend_elements, title="Class", loc="upper center")
-
-    plt.suptitle(f"t-SNE — {client_id}", fontsize=13, fontweight="bold", y=1.01)
+        ax.legend(handles=legend_elements, title="Class", loc="upper right")
     plt.tight_layout()
 
     out_path = os.path.join("tsne_plots", f"tSNE_{client_id}.png")
     os.makedirs("tsne_plots", exist_ok=True)
-    plt.savefig(out_path, dpi=150, bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"  Saved → {out_path}\n")
 
