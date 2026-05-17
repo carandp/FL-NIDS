@@ -37,6 +37,12 @@ uv run python dp_noise_calibrator.py --target-epsilon 50.0
 
 Edit the `config_fed_client.template.json` accordingly.
 
+To quickly get estimated privacy budget given a noise multiplier run:
+
+```bash
+uv run dp_noise_estimator.py --clip-norm 2.0 --noise 0.20
+```
+
 ---
 
 ## 2. Setup
@@ -166,3 +172,6 @@ uv run python gen_diagnostic_plot_global.py \
     --hist_max 0.002
 ```
 
+```bash
+uv run python trade_off_plot.py
+```
