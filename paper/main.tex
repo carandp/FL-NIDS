@@ -533,7 +533,7 @@ However, the experimental results also demonstrate that these confidentiality im
 
 \subsubsection{Privacy-Utility Tradeoff Overview}
 
-\autoref{tab:low_noise_epsilon} and \autoref{fig:privacy_utility_tradeoff} summarize the impact of varying Differential Privacy noise multiplier configurations on federated intrusion detection performance and accumulated client privacy budgets.
+\autoref{tab:low_noise_epsilon} and \autoref{fig:privacy_utility_tradeoff} summarize the impact of varying DP noise multiplier configurations on federated intrusion detection performance and accumulated client privacy budgets.
 
 \begin{table}[ht]
     \centering
@@ -566,7 +566,7 @@ However, the experimental results also demonstrate that these confidentiality im
 
 The results demonstrate a clear privacy-utility tradeoff across the evaluated configurations. Increasing the noise multiplier reduces the accumulated privacy budget ($\epsilon$), thereby improving theoretical privacy guarantees. However, stronger noise injection also produces substantial degradation in intrusion detection performance, reflected in lower Macro F1-score and PR-AUC values.
 
-Conversely, smaller noise multiplier values partially recover classification capability, particularly for the Macro F1-score. Nevertheless, these configurations result in extremely large accumulated privacy budgets, reaching impractically high $\epsilon$ values despite improved utility metrics.
+On the contrary, smaller noise multiplier values partially recover classification capability, particularly for the Macro F1-score. Nevertheless, these configurations result in extremely large accumulated privacy budgets, reaching impractically high $\epsilon$ values despite improved utility metrics.
 
 The tradeoff visualization presented in \autoref{fig:privacy_utility_tradeoff} highlights the difficulty of simultaneously achieving strong privacy guarantees and stable intrusion detection performance under the evaluated federated GraphIDS architecture and client-side Gaussian perturbation strategy.
 
@@ -583,7 +583,7 @@ Overall, the evaluated DP configurations produced limited practical privacy-util
     \label{fig:privacy_budget}
 \end{figure}
 
-The results demonstrate continuous privacy budget accumulation across communication rounds for all evaluated clients. Although higher noise multiplier configurations reduced the rate of privacy loss accumulation, the resulting privacy budgets remained extremely large even under the best-performing Differential Privacy configuration. For example, the configuration using a noise multiplier of $\sigma=0.10$ still accumulated a maximum client privacy budget exceeding $3.19 \times 10^7$, indicating that the evaluated client-side perturbation strategy failed to achieve practically meaningful privacy guarantees within the tested federated environment.
+The results demonstrate continuous privacy budget accumulation across communication rounds for all evaluated clients. Although higher noise multiplier configurations reduced the rate of privacy loss accumulation, the resulting privacy budgets remained extremely large even under the best-performing DP configuration. For example, the configuration using a noise multiplier of $\sigma=0.10$ still accumulated a maximum client privacy budget exceeding $3.19 \times 10^7$, indicating that the evaluated client-side perturbation strategy failed to achieve practically meaningful privacy guarantees within the tested federated environment.
 
 The privacy budget progression also revealed heterogeneous behavior across federated clients. Under higher noise multiplier configurations ($\sigma=0.20$ and $\sigma=0.15$), the largest accumulated privacy budget was observed in the client containing the smallest dataset partition. In contrast, lower noise multiplier configurations ($\sigma=0.10$ and $\sigma=0.05$) produced the highest privacy budget accumulation in the client with the largest dataset partition.
 
@@ -602,23 +602,23 @@ These findings highlight the difficulty of maintaining balanced DP guarantees ac
     \label{fig:federated_metrics_clients_9c37d2b1-906c-40cd-86a6-79613e35aa2d}
 \end{figure}
 
-Despite achieving the strongest overall utility metrics among the evaluated DP experiments, the training process still exhibited substantially higher optimization instability compared to both the plaintext federated and SecAgg configurations. In particular, the training loss consistently increased across communication rounds for all evaluated clients, with certain participants reaching extremely large loss values during later training stages. Client 0, for example, accumulated training loss values approaching 29.80 during training. This behavior suggests that the injected Gaussian perturbation significantly interfered with stable gradient optimization and parameter convergence.
+Despite achieving the strongest overall metrics among the evaluated DP experiments, the training process still exhibited substantially higher optimization instability compared to both the plaintext federated and SecAgg configurations. In particular, the training loss consistently increased across communication rounds for all evaluated clients, with certain participants reaching extremely large loss values during later training stages. Client 0, for example, accumulated training loss values approaching 29.80 during training. This behavior suggests that the injected Gaussian perturbation significantly interfered with stable gradient optimization and parameter convergence.
 
 Unlike the relatively stable convergence observed in previous configurations, the evaluation metrics under DP displayed highly oscillatory behavior throughout training. Both Macro F1-score and PR-AUC experienced repeated increases and decreases across communication rounds with only limited long-term improvement. Although the global model achieved a final Macro F1-score of 0.8129 and a PR-AUC of 0.4296 under this configuration, the metric evolution indicates that the model failed to achieve stable convergence throughout federated optimization.
 
-Client 0 exhibited the highest degree of instability, presenting the largest fluctuations in both Macro F1-score and PR-AUC across communication rounds. This behavior may be associated with the severe class imbalance present within the corresponding local dataset partition, where the combination of limited malicious traffic representation and repeated noisy perturbation amplified optimization sensitivity.
+Client 0 exhibited the highest degree of instability, presenting the largest fluctuations in both Macro F1-score and PR-AUC across communication rounds. This behavior may be associated with the severe class imbalance present within the corresponding local dataset partition, where the combination of limited malicious traffic representation and repeated noisy perturbation amplified optimization volatility.
 
 Despite the unstable training dynamics, the models did not completely collapse and remained capable of partially distinguishing malicious and benign traffic patterns. However, the overall results suggest that the evaluated client-side DP strategy substantially degraded convergence quality and prevented consistent federated optimization under the tested graph-based intrusion detection architecture.
 
 \subsubsection{Impact of Noise Multiplier}
 
-The experimental results demonstrate that the Differential Privacy noise multiplier strongly influences both intrusion detection performance and accumulated privacy budget growth.
+The experimental results demonstrate that the DP noise multiplier strongly influences both intrusion detection performance and accumulated privacy budget growth.
 
 Higher noise multiplier configurations reduced the accumulated privacy budget by injecting stronger perturbation into local model updates. However, this additional noise also produced lower Macro F1-score and PR-AUC values together with increasingly unstable optimization behavior during federated training.
 
-Conversely, smaller noise multiplier values partially improved model utility by reducing the magnitude of the injected perturbation. Despite these improvements, the corresponding privacy budgets increased to impractically large $\epsilon$ values, indicating weak effective privacy guarantees.
+On the other hand, smaller noise multiplier values partially improved model utility by reducing the magnitude of the injected perturbation. Despite these improvements, the corresponding privacy budgets increased to impractically large $\epsilon$ values, indicating weak effective privacy guarantees.
 
-The observed relationship between noise multiplier and utility was also non-linear across experiments, suggesting that Differential Privacy perturbation interacts sensitively with the heterogeneous and imbalanced federated training environment used in this work.
+The observed relationship between noise multiplier and utility was also non-linear across experiments, suggesting that DP perturbation interacts sensitively with the heterogeneous and imbalanced federated training environment used in this work.
 
 \subsubsection{Practical Limitations}
 
@@ -626,7 +626,7 @@ The experimental results indicate that the evaluated client-side DP configuratio
 
 Although DP successfully perturbed local model updates during training, the resulting privacy-utility tradeoff remained unfavorable across all evaluated configurations. Higher noise multiplier values produced severe degradation in model stability and intrusion detection capability, while lower noise configurations accumulated extremely large privacy budgets that failed to provide practically meaningful privacy guarantees.
 
-The results further suggest that the combination of graph neural network embeddings, Transformer-based reconstruction, severe class imbalance, and heterogeneous federated client distributions significantly increases optimization sensitivity under noisy training conditions.
+The results further suggest that the combination of GNN embeddings, Transformer-based reconstruction, severe class imbalance, and heterogeneous federated client distributions significantly increases optimization sensitivity under noisy training conditions.
 
 Overall, the evaluated DP strategy demonstrated limited practical feasibility for the tested federated GraphIDS architecture without additional optimization mechanisms, adaptive privacy accounting strategies, or alternative privacy-preserving training approaches.
 
@@ -637,78 +637,53 @@ Overall, the evaluated DP strategy demonstrated limited practical feasibility fo
 
 The experimental results demonstrate that federated learning is a viable training strategy for the evaluated GraphIDS architecture. Despite the heterogeneous non-IID distribution of network traffic across clients, the federated configuration preserved intrusion detection performance relatively close to the centralized baseline while maintaining stable convergence behavior throughout training.
 
-The latent representation analysis further suggests that the GNN and Transformer-based reconstruction modules remained capable of learning meaningful structural traffic patterns under distributed training conditions. Although certain clients exhibited reduced separability and lower local performance due to severe class imbalance, the aggregated global model maintained effective anomaly discrimination capability.
-
-These findings indicate that FL can support graph-based intrusion detection without requiring centralized access to raw network traffic data, making it a promising approach for privacy-sensitive distributed cybersecurity environments.
+The embeddings representation analysis further suggests that the GNN and Transformer-based reconstruction modules remained capable of learning meaningful structural traffic patterns under distributed training conditions. Although certain clients exhibited reduced separability and lower local performance due to severe class imbalance, the aggregated global model maintained effective anomaly discrimination capability. These findings indicate that FL can support graph-based intrusion detection without requiring centralized access to raw network traffic data, making it a promising approach for privacy-sensitive distributed cybersecurity environments.
 
 \subsection{Trade-off Between Privacy and System Performance}
 
 The experimental results reveal a clear trade-off between privacy preservation and system efficiency within the evaluated federated intrusion detection environment. While privacy-preserving mechanisms improved the confidentiality of client training updates, they also introduced measurable degradation in model performance, optimization stability, computational cost, and communication overhead.
 
-SecAgg maintained relatively strong intrusion detection capability while significantly increasing runtime and data transmission requirements due to HE operations and ciphertext expansion. In contrast, the evaluated DP configurations introduced substantially greater optimization instability and weaker utility preservation, while still accumulating impractically large privacy budgets under several experimental settings.
-
 These findings suggest that achieving strong privacy guarantees in graph-based federated intrusion detection systems remains challenging, particularly under heterogeneous client distributions and complex representation learning architectures.
 
 \subsection{Secure Aggregation vs Differential Privacy}
 
-Among the evaluated privacy-preserving mechanisms, SecAgg demonstrated substantially greater practical feasibility than the tested DP configurations. Although HE introduced significant computational and communication overhead, the encrypted federated pipeline preserved stable convergence behavior together with relatively strong intrusion detection performance.
-
-In contrast, the client-side DP strategy produced severe optimization instability, inconsistent metric behavior, and extremely large accumulated privacy budgets across multiple experimental configurations. The injected perturbation interfered considerably with the learning process, particularly under heterogeneous and imbalanced client distributions.
+Among the evaluated privacy-preserving mechanisms, SecAgg demonstrated substantially greater practical feasibility than the tested DP configurations. Although HE introduced significant computational and communication overhead, the encrypted federated pipeline preserved stable convergence behavior together with relatively strong intrusion detection performance. In contrast, the client-side DP strategy produced severe optimization instability, inconsistent metric behavior, and extremely large accumulated privacy budgets across multiple experimental configurations. The injected perturbation interfered considerably with the learning process, particularly under heterogeneous and imbalanced client distributions.
 
 These results suggest that confidentiality-preserving aggregation may currently represent a more practical privacy-preserving approach for graph-based federated intrusion detection systems than direct noisy client-side update perturbation under the evaluated experimental conditions.
 
 \subsection{Impact of Heterogeneous Client Distributions}
 
-The experimental results indicate that heterogeneous client data distributions significantly influenced federated optimization behavior, embedding representation quality, and privacy budget accumulation throughout training.
-
-Clients containing smaller or severely imbalanced datasets exhibited greater instability in both performance metrics and embedding space separability, particularly under privacy-preserving training configurations. These effects became more pronounced during DP experiments, where noisy perturbation amplified optimization sensitivity across clients with limited attack representation.
-
-The observed variability highlights one of the primary challenges of real-world federated intrusion detection environments, where participating organizations may contain substantially different traffic distributions, dataset sizes, and attack frequencies. Under these conditions, maintaining balanced model performance and privacy guarantees across all federated participants becomes considerably more difficult.
+The experimental results indicate that heterogeneous client data distributions significantly influenced federated optimization behavior, embedding representation quality, and privacy budget accumulation throughout training. Clients containing smaller or severely imbalanced datasets exhibited greater instability in both performance metrics and embedding space separability, particularly under privacy-preserving training configurations. These effects became more pronounced during DP experiments, where noisy perturbation amplified optimization sensitivity across clients with limited attack representation. The observed variability highlights one of the primary challenges of real-world federated intrusion detection environments, where participating organizations may contain substantially different traffic distributions, dataset sizes, and attack frequencies. Under these conditions, maintaining balanced model performance and privacy guarantees across all federated participants becomes considerably more difficult.
 
 \subsection{Practical Implications for Real Deployments}
 
-The obtained results suggest that FL can provide a practical foundation for collaborative intrusion detection across distributed organizations without requiring centralized sharing of raw network traffic data. The evaluated GraphIDS architecture maintained relatively strong detection capability under federated training while preserving meaningful latent traffic representations across clients.
-
-However, the experiments also demonstrate that privacy-preserving mechanisms introduce substantial operational trade-offs. SecAgg significantly increased communication and computational cost, while the evaluated DP strategy produced unstable optimization behavior and limited practical privacy guarantees.
-
-These findings indicate that real-world deployment of privacy-preserving federated intrusion detection systems requires careful consideration of scalability constraints, client heterogeneity, and the balance between confidentiality protection and detection effectiveness.
+The obtained results suggest that FL can provide a practical foundation for collaborative intrusion detection across distributed organizations without requiring centralized sharing of raw network traffic data. However, the experiments also demonstrate that privacy-preserving mechanisms introduce substantial operational trade-offs. SecAgg significantly increased communication and computational cost, while the evaluated DP strategy produced unstable optimization behavior and limited practical privacy guarantees. These findings indicate that real-world deployment of privacy-preserving federated intrusion detection systems requires consideration of scalability constraints, client heterogeneity, and the balance between confidentiality protection and detection effectiveness.
 
 \subsection{Limitations of the Study}
 
-This study presents several limitations that should be considered when interpreting the experimental results. The federated environment was evaluated using a limited number of simulated clients under a controlled experimental configuration, which may not fully represent the complexity of large-scale real-world deployments.
-
-Additionally, the experiments focused exclusively on the FedAvg aggregation strategy together with a fixed local epoch training configuration. Alternative aggregation methods, adaptive optimization strategies, or personalized federated learning approaches may produce different stability and performance behavior under heterogeneous client conditions.
-
-The DP evaluation was also limited to client-side Gaussian perturbation using fixed noise multiplier configurations. More advanced privacy-preserving approaches, such as adaptive clipping, personalized privacy accounting, or secure aggregation-assisted DP, were not explored within the scope of this work.
+This study presents several limitations that should be considered when interpreting the experimental results. The federated environment was evaluated using a limited number of simulated clients under a controlled experimental configuration, which may not fully represent the complexity of large-scale real-world deployments. Additionally, the experiments focused exclusively on the FedAvg aggregation strategy together with a fixed local epoch training configuration. Alternative aggregation methods, adaptive optimization strategies, or personalized federated learning approaches may produce different stability and performance behavior under heterogeneous client conditions. The DP evaluation was also limited to client-side Gaussian perturbation using fixed noise multiplier configurations. More advanced privacy-preserving approaches, such as adaptive clipping, or personalized privacy accounting, were not explored within the scope of this work.
 
 \subsection{Future Work}
 
-Future work may explore alternative federated optimization strategies capable of improving stability under heterogeneous client distributions, including personalized federated learning, adaptive client weighting, or asynchronous aggregation approaches.
-
-Additional research is also needed to evaluate more advanced DP mechanisms for graph-based intrusion detection systems. Techniques such as adaptive gradient clipping, privacy amplification strategies, or secure aggregation-assisted DP may help improve the observed privacy-utility trade-off.
-
-Finally, future experiments should evaluate larger-scale federated environments with additional clients, more diverse traffic distributions, and real-world deployment constraints in order to further analyze the scalability and operational feasibility of privacy-preserving federated intrusion detection systems.
-
+Future work may explore alternative federated optimization strategies capable of improving stability under heterogeneous client distributions, including personalized federated learning, adaptive client weighting, or asynchronous aggregation approaches. Additional research is also needed to evaluate more advanced DP mechanisms for graph-based intrusion detection systems. Techniques such as adaptive gradient clipping, or privacy amplification strategies may help improve the observed privacy-utility trade-off. Finally, future experiments should evaluate larger-scale federated environments with additional clients, and more diverse traffic distributions in order to further analyze the scalability and operational feasibility of privacy-preserving F-NIDS.
 
 \section{Conclusion}
 
-This work presented and evaluated a privacy-preserving federated learning architecture for graph-based intrusion detection using the GraphIDS framework integrated with Federated Averaging, homomorphic encryption-based Secure Aggregation, and Differential Privacy mechanisms within the NVIDIA FLARE environment.
+This work presented and evaluated a privacy-preserving FL architecture for graph-based intrusion detection using the GraphIDS framework integrated with FedAvg, HR-based SecAgg, and DP mechanisms within the NVFlare environment.
 
-The experimental results demonstrated that federated learning is a viable approach for distributed graph-based intrusion detection under heterogeneous non-IID client conditions. The federated GraphIDS configuration preserved performance relatively close to the centralized baseline while maintaining stable collaborative optimization behavior and meaningful latent traffic representations without requiring centralized access to raw network traffic data.
+The experimental results demonstrated that FL is a viable approach for distributed graph-based intrusion detection under heterogeneous non-IID client conditions. The federated GraphIDS configuration preserved performance relatively close to the centralized baseline while maintaining stable collaborative optimization behavior and meaningful embedding traffic representations without requiring centralized access to raw network traffic data.
 
-The integration of homomorphic encryption-based Secure Aggregation successfully protected client model updates during federated training by preventing the aggregation server from accessing plaintext parameters. Although the encrypted pipeline introduced substantial computational and communication overhead due to ciphertext expansion and homomorphic encryption operations, the resulting model preserved effective intrusion detection capability together with stable convergence behavior.
+The integration of HE-based SecAgg successfully protected client model updates during federated training by preventing the aggregation server from accessing plaintext parameters. Although the encrypted pipeline introduced substantial computational and communication overhead due to ciphertext expansion and HE operations, the resulting model preserved effective intrusion detection capability together with stable convergence behavior.
 
-In contrast, the evaluated client-side Differential Privacy configurations produced severe optimization instability, oscillatory metric behavior, and extremely large accumulated privacy budgets across multiple experimental settings. The results suggest that direct noisy perturbation strategies may be insufficient for complex graph-based intrusion detection architectures operating under highly heterogeneous and imbalanced federated environments.
+In contrast, the evaluated client-side DP configurations produced severe optimization instability, oscillatory metric behavior, and extremely large accumulated privacy budgets across multiple experimental settings. The results suggest that direct noisy perturbation strategies may be insufficient for complex graph-based intrusion detection architectures operating under highly heterogeneous and imbalanced federated environments.
 
 Overall, the findings indicate that privacy-preserving federated intrusion detection involves significant trade-offs between confidentiality, model utility, optimization stability, and system scalability. While federated graph-based intrusion detection proved feasible under distributed training conditions, achieving strong practical privacy guarantees without substantially degrading model performance remains a major challenge for real-world deployments.
 
-Future work should explore adaptive privacy-preserving optimization strategies, alternative federated aggregation methods, and larger-scale heterogeneous environments to further improve the practicality and scalability of secure federated intrusion detection systems.
+Future work should explore adaptive privacy-preserving optimization strategies, alternative federated aggregation methods, and larger-scale heterogeneous environments to further improve the practicality and scalability of secure FL-NIDS.
 
 \section*{Acknowledgment}
 
-The author thanks the Universidad de los Andes for  all the academic support provided. The author also thanks all teachers, especially Ph.D. Yuri Andrea Pinto as this thesis advisor.
-
-The authors would like to acknowledge the use of LLMs to assist in grammatical refinement, copyediting, and text redaction during the preparation of this manuscript. All primary content, technical claims, and experimental interpretations remain the sole responsibility of the authors.
+LLMs were used to assist in writing and reviewing this manuscript. All experimental work and original ideas are the authors' own.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
