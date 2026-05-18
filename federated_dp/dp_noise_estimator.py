@@ -83,9 +83,9 @@ def estimate_max_epsilon(
 # Your setup — edit these values
 # ------------------------------------------------------------------
 CLIENTS = [
-    ClientSpec(name="client_1", dataset_size=770_415, batch_size=32, local_epochs=2),
-    ClientSpec(name="client_2", dataset_size=1_394_658, batch_size=32, local_epochs=2),
-    ClientSpec(name="client_3", dataset_size=10_960, batch_size=32, local_epochs=2),
+    ClientSpec(name="client_0", dataset_size=770_415, batch_size=32, local_epochs=2),
+    ClientSpec(name="client_1", dataset_size=1_394_658, batch_size=32, local_epochs=2),
+    ClientSpec(name="client_2", dataset_size=10_960, batch_size=32, local_epochs=2),
 ]
 
 if __name__ == "__main__":
