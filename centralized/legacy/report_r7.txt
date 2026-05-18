@@ -1,0 +1,88 @@
+(graphids) carandp@DESKTOP-2TD7K2T:~/FL-NIDS/centralized$ uv run main.py --data_dir datasets/ --config configs/NF-CSE-CIC-IDS2018-v3.yaml
+wandb: Tracking run with wandb version 0.23.0
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /home/carandp/FL-NIDS/centralized/wandb/offline-run-20260509_191304-l6lccqs7
+Number of features: 49
+Starting training...
+Epochs: 100%|██████████████████████████████████████████████| 100/100 [05:49<00:00,  3.49s/it, train_loss=0.00338, val_loss=0.000428, val_pr_auc=0.427, test_f1=0.805, test_pr_auc=0.394]
+Evaluating on test set...
+Test macro F1-score: 0.8044
+Test PR-AUC: 0.3939
+Test prediction time: 0.1104 seconds
+Peak GPU memory usage: 1153.83 MB
+wandb: 
+wandb: Run history:
+wandb:        final_test_f1 ▁
+wandb:    final_test_pr_auc ▁
+wandb:   peak_gpu_memory_mb ▁
+wandb:              test_f1 ▁▁▂▃▃▃▃▃▃▃▃▄▄▄▄▃▅▄▄▅▅▃▅▅▆▆▆▆▆▆▆▇▇▇▇▆▇███
+wandb:          test_pr_auc ▂▁▁▁▂▂▂▂▂▂▂▂▂▃▃▃▃▃▃▃▄▄▄▄▅▅▅▅▅▅▅▅▆▆▆▇▇▇▇█
+wandb: test_prediction_time ▁
+wandb:       test_threshold ▁
+wandb:           train_loss █▄▃▃▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:             val_loss █▅▄▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           val_pr_auc ▁▁▂▂▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▄▄▅▄▅▅▆▆▆▆▆▆▆▇▇▇▇▇▇█
+wandb: 
+wandb: Run summary:
+wandb:        final_test_f1 0.80439
+wandb:    final_test_pr_auc 0.3939
+wandb:   peak_gpu_memory_mb 1153.8291
+wandb:              test_f1 0.80466
+wandb:          test_pr_auc 0.39415
+wandb: test_prediction_time 0.11043
+wandb:       test_threshold 0.00053
+wandb:           train_loss 0.00338
+wandb:             val_loss 0.00043
+wandb:           val_pr_auc 0.42682
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/carandp/FL-NIDS/centralized/wandb/offline-run-20260509_191304-l6lccqs7
+wandb: Find logs at: ./wandb/offline-run-20260509_191304-l6lccqs7/logs
+
+
+
+Second try:
+
+
+(graphids) carandp@DESKTOP-2TD7K2T:~/FL-NIDS/centralized$ uv run main.py --data_dir datasets/ --config configs/NF-CSE-CIC-IDS2018-v3.yaml
+wandb: Tracking run with wandb version 0.23.0
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /home/carandp/FL-NIDS/centralized/wandb/offline-run-20260509_192254-7gdsmwbb
+Processing dataset NF-CSE-CIC-IDS2018-v3...
+Done!
+Number of features: 49
+Starting training...
+Epochs: 100%|██████████████████████████████████████████████| 100/100 [03:41<00:00,  2.22s/it, train_loss=0.00608, val_loss=0.000995, val_pr_auc=0.846, test_f1=0.974, test_pr_auc=0.888]
+Evaluating on test set...
+Test macro F1-score: 0.9738
+Test PR-AUC: 0.8885
+Test prediction time: 0.0629 seconds
+Peak GPU memory usage: 1131.06 MB
+wandb: 
+wandb: Run history:
+wandb:        final_test_f1 ▁
+wandb:    final_test_pr_auc ▁
+wandb:   peak_gpu_memory_mb ▁
+wandb:              test_f1 ▁▁▁▁▁▃▃▃▃▃▃▃▃▃▃▃▄▄▄▅▅▅▆▆▆▇▇▇▇▇▇▇▇███████
+wandb:          test_pr_auc ▁▁▁▁▁▂▂▂▂▂▃▃▃▃▄▄▅▅▅▅▆▆▇▇▇▇▇▇▇▇▇▇▇▇██████
+wandb: test_prediction_time ▁
+wandb:       test_threshold ▁
+wandb:           train_loss █▃▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:             val_loss █▅▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           val_pr_auc ▁▁▁▁▂▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▆▆▆▆▇▇▇▇▇▇█████
+wandb: 
+wandb: Run summary:
+wandb:        final_test_f1 0.97376
+wandb:    final_test_pr_auc 0.88852
+wandb:   peak_gpu_memory_mb 1131.06396
+wandb:              test_f1 0.97365
+wandb:          test_pr_auc 0.88812
+wandb: test_prediction_time 0.06291
+wandb:       test_threshold 0.00198
+wandb:           train_loss 0.00608
+wandb:             val_loss 0.001
+wandb:           val_pr_auc 0.84579
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync /home/carandp/FL-NIDS/centralized/wandb/offline-run-20260509_192254-7gdsmwbb
+wandb: Find logs at: ./wandb/offline-run-20260509_192254-7gdsmwbb/logs

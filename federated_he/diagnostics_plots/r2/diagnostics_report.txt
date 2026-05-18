@@ -1,0 +1,32 @@
+=== client0 ===
+Loaded model from: /home/carandp/FL-NIDS/federated_he/poc_workspace/fl_nids/prod_00/client0/checkpoints/best_global_model_client0.pt
+No threshold provided, using mean of errors for prediction.
+Positive rate: 0.561914
+AP (errors)  : 0.825632
+AP (-errors) : 0.379649
+Saved: /home/carandp/FL-NIDS/federated_he/diagnostics_plots/diagnostics_client0.png
+
+=== client1 ===
+Loaded model from: /home/carandp/FL-NIDS/federated_he/poc_workspace/fl_nids/prod_00/client1/checkpoints/best_global_model_client1.pt
+No threshold provided, using mean of errors for prediction.
+Positive rate: 0.125443
+AP (errors)  : 0.996466
+AP (-errors) : 0.065761
+Saved: /home/carandp/FL-NIDS/federated_he/diagnostics_plots/diagnostics_client1.png
+
+=== client2 ===
+Loaded model from: /home/carandp/FL-NIDS/federated_he/poc_workspace/fl_nids/prod_00/client2/checkpoints/best_global_model_client2.pt
+No threshold provided, using mean of errors for prediction.
+Positive rate: 0.024635
+AP (errors)  : 0.438550
+AP (-errors) : 0.013436
+Saved: /home/carandp/FL-NIDS/federated_he/diagnostics_plots/diagnostics_client2.png
+
+Clients: client0, client1, client2
+Detected HE checkpoint bytes. Decoding with context: /home/carandp/FL-NIDS/federated_he/poc_workspace/fl_nids/prod_00/client0/startup/client_context.tenseal
+Loaded model from: /home/carandp/FL-NIDS/federated_he/jobs/48ade0c8-a00c-4591-bccb-7803945a0aa4/workspace/app_server/FL_global_model.pt
+No threshold provided, using mean of errors for prediction.
+Positive rate: 0.279466
+AP(errors): 0.747919
+AP(-errors): 0.161040
+Saved: /home/carandp/FL-NIDS/federated_he/diagnostics_plots/diagnostics_global_48ade0c8-a00c-4591-bccb-7803945a0aa4.png

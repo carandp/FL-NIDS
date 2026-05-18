@@ -1,22 +1,36 @@
 # Federated Learning — Quick Start Guide
 
-> **Prerequisites:** `uv` installed and the dataset available at `datasets/NF-CSE-CIC-IDS2018-v3/`. See the root README for setup details.
-
+> **Prerequisites:** `uv` installed and the dataset available at `../datasets/fed_clients/`. The fed_clients folder is generated with data_analysis/data.ipynb.
+> 
+> **Expected Data Structure:** 
+> ```
+> ../datasets/fed_clients/
+> ├── client0/
+> │   ├── client0.parquet
+> │   └── pyg_graph_data/
+> ├── client1/
+> │   ├── client1.parquet
+> │   └── pyg_graph_data/
+> └── client2/
+>     ├── client2.parquet
+>     └── pyg_graph_data/
+> ```
 ---
 
-## 1. Change Kernel (if needed)
+## 1. Change kernel and install dependencies (if needed)
 
 ```bash
 cd federated/
+uv sync
 source .venv/bin/activate
 ```
 
 ---
 
-## 2. Install dependencies and setup
+## 2. Setup
 
 ```bash
-uv sync && uv run python gen_config.py
+uv run python gen_config.py
 ```
 
 ---
@@ -26,13 +40,13 @@ uv sync && uv run python gen_config.py
 The first time (or after deleting `poc_workspace/`):
 
 ```bash
-uv run nvflare poc prepare -i ./project.yml -d .
+NVFLARE_POC_WORKSPACE=/home/<user>/FL-NIDS/federated/poc_workspace uv run nvflare poc prepare -i ./project.yml
 ```
 
 Link job directory
 
 ```bash
-uv run nvflare poc prepare-jobs-dir -j ./jobs
+NVFLARE_POC_WORKSPACE=/home/<user>/FL-NIDS/federated/poc_workspace uv run nvflare poc prepare-jobs-dir -j ./jobs
 ```
 
 Then start the server, client, and admin console together:
@@ -49,7 +63,7 @@ You will see a `>` prompt — this is the NVFlare admin console.
 
 At the `>` prompt:
 
-```
+```bash
 submit_job nids_fedavg
 ```
 
@@ -67,7 +81,7 @@ Training progress is printed to the same terminal. Each round logs the local epo
 
 Once all rounds complete (you will see `FINISHED:COMPLETED` in the logs), download the job output at the `>` prompt:
 
-```
+```bash
 download_job <job_id>
 ```
 
@@ -100,6 +114,12 @@ Test PR-AUC         : 0.XXXX
 Prediction time     : X.XXXX s
 ```
 
+```bash
+uv run python gen_eval_clients.py
+```
+
+Will evaluate the clients of the last runned job.
+
 ## 7. Extras
 
 To generate metrics_plots:
@@ -120,3 +140,17 @@ or
 uv run python gen_tSNE_server.py \
         --job <job_id>
 ```
+
+To generate diagnostics:
+
+```bash
+uv run python gen_diagnostics_plots.py
+```
+
+```bash
+uv run python gen_diagnostic_plot_global.py \
+    --job <job_id> \
+    --hist_min 0.0 \
+    --hist_max 0.002
+```
+

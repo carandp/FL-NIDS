@@ -1,0 +1,31 @@
+=== client0 ===
+Loaded model from: /home/carandp/FL-NIDS/federated/poc_workspace/fl_nids/prod_00/client0/checkpoints/best_global_model_client0.pt
+No threshold provided, using mean of errors for prediction.
+Positive rate: 0.561914
+AP (errors)  : 0.863148
+AP (-errors) : 0.377234
+Saved: /home/carandp/FL-NIDS/federated/diagnostics_plots/diagnostics_client0.png
+
+=== client1 ===
+Loaded model from: /home/carandp/FL-NIDS/federated/poc_workspace/fl_nids/prod_00/client1/checkpoints/best_global_model_client1.pt
+No threshold provided, using mean of errors for prediction.
+Positive rate: 0.125443
+AP (errors)  : 0.939835
+AP (-errors) : 0.065883
+Saved: /home/carandp/FL-NIDS/federated/diagnostics_plots/diagnostics_client1.png
+
+=== client2 ===
+Loaded model from: /home/carandp/FL-NIDS/federated/poc_workspace/fl_nids/prod_00/client2/checkpoints/best_global_model_client2.pt
+No threshold provided, using mean of errors for prediction.
+Positive rate: 0.024635
+AP (errors)  : 0.691675
+AP (-errors) : 0.013079
+Saved: /home/carandp/FL-NIDS/federated/diagnostics_plots/diagnostics_client2.png
+
+Clients: client0, client1, client2
+Loaded model from: /home/carandp/FL-NIDS/federated/jobs/3418385e-9faa-4272-aca0-a019656161db/workspace/app_server/FL_global_model.pt
+No threshold provided, using mean of errors for prediction.
+Positive rate: 0.279466
+AP(errors): 0.851499
+AP(-errors): 0.158211
+Saved: /home/carandp/FL-NIDS/federated/diagnostics_plots/diagnostics_global_3418385e-9faa-4272-aca0-a019656161db.png
