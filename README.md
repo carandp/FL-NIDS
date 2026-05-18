@@ -37,11 +37,11 @@ This folder contains the Hardened Federated Model with Secure Aggregation.
 This folder contains the Hardened Federated Model with Differential Privacy.
 
 - **Differential Privacy (DP).** Implementation of controlled random noise to protect against membership inference attacks.  
-- **Parametric Study.** Contains the 25 simulations varying the noise multiplier (σ) to generate accuracy-privacy trade-off curves.
+- **Parametric Study.** Contains the simulations varying the noise multiplier (σ) to generate accuracy-privacy trade-off curves.
 
 ### 1.5 paper/
 
-This folder containes the LaTeX code used to generate the projects' paper.
+This folder containes the LaTeX code and PDF of the projects' paper.
 
 ---
 
